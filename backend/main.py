@@ -413,32 +413,57 @@ def student_submissions(student: str):
 
 @app.get("/api/all-submissions")
 def all_submissions():
+
     result = []
+
     base = os.path.join(
-    STORAGE_DIR,
-    "students"
-)
+        "/tmp",
+        "students"
+    )
 
     if not os.path.exists(base):
         return []
 
     for student in os.listdir(base):
-        student_path = f"{base}/{student}/submissions"
-        if not os.path.exists(student_path):
+
+        student_path = os.path.join(
+            base,
+            student,
+            "submissions"
+        )
+
+        if not os.path.exists(
+            student_path
+        ):
             continue
 
-        for date in os.listdir(student_path):
-            date_path = os.path.join(student_path, date)
-            for file in os.listdir(date_path):
+        for date in os.listdir(
+            student_path
+        ):
+
+            date_path = os.path.join(
+                student_path,
+                date
+            )
+
+            if not os.path.isdir(
+                date_path
+            ):
+                continue
+
+            for file in os.listdir(
+                date_path
+            ):
+
                 result.append({
                     "student": student,
                     "date": date,
                     "file": file,
-                    "download_url": f"/api/download-submission/{student}/{date}/{file}",
+                    "download_url":
+                    f"/api/download-submission/{student}/{date}/{file}",
                 })
 
     return result
-
 
 @app.get("/api/download-submission/{student}/{date}/{filename}")
 def download_submission(
