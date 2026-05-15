@@ -233,46 +233,81 @@ def get_test(test_id: str):
 
 @app.post("/api/submit-test")
 def submit_test(req: TestSubmit):
-    if req.student not in TEST_SUBMISSIONS:
-        TEST_SUBMISSIONS[req.student] = {}
+    try:
+        if req.student not in TEST_SUBMISSIONS:
+            TEST_SUBMISSIONS[req.student] = {}
 
-    if req.test_id in TEST_SUBMISSIONS[req.student]:
-        raise HTTPException(status_code=400, detail="Already completed")
+        if req.test_id in TEST_SUBMISSIONS[req.student]:
+            raise HTTPException(
+                status_code=400,
+                detail="Already completed"
+            )
 
-    test = TESTS[req.test_id]
-    score = 0
-    review = []
+        test = TESTS.get(req.test_id)
 
-    for q in test["questions"]:
-        qid = str(q["id"])
-        student_answer = req.answers.get(qid, "Not Answered")
+        if not test:
+            raise HTTPException(
+                status_code=404,
+                detail="Test not found"
+            )
 
-        if student_answer == q["answer"]:
-            score += 1
+        score = 0
+        review = []
 
-        review.append({
-            "question": q["question"],
-            "student_answer": student_answer,
-            "correct_answer": q["answer"],
-            "explanation": q.get("explanation", "No explanation available"),
-        })
+        for q in test["questions"]:
+            qid = str(q["id"])
 
-    TEST_SUBMISSIONS[req.student][req.test_id] = {
-        "date": str(datetime.now().date()),
-        "score": score,
-        "answers": req.answers,
-    }
+            student_answer = req.answers.get(
+                qid,
+                "Not Answered"
+            )
 
-    with open(RESULTS_FILE, "w") as f:
-        json.dump(TEST_SUBMISSIONS, f, indent=4)
+            if student_answer == q["answer"]:
+                score += 1
 
-    return {
-        "success": True,
-        "score": score,
-        "total_questions": len(test["questions"]),
-        "review": review,
-    }
+            review.append({
+                "question": q["question"],
+                "student_answer": student_answer,
+                "correct_answer": q["answer"],
+                "explanation": q.get(
+                    "explanation",
+                    "No explanation available"
+                ),
+            })
 
+        TEST_SUBMISSIONS[req.student][req.test_id] = {
+            "date": str(datetime.now().date()),
+            "score": score,
+            "answers": req.answers,
+        }
+
+        # OPTIONAL SAVE TO TMP
+        try:
+            tmp_file = "/tmp/results.json"
+
+            with open(tmp_file, "w") as f:
+                json.dump(
+                    TEST_SUBMISSIONS,
+                    f,
+                    indent=4
+                )
+        except Exception:
+            pass
+
+        return {
+            "success": True,
+            "score": score,
+            "total_questions": len(
+                test["questions"]
+            ),
+            "review": review,
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 @app.get("/api/all-test-results")
 def get_all_results():
