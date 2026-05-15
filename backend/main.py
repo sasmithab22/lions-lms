@@ -90,19 +90,6 @@ STUDENT_USERS = {
     "prabavathy":      {"password": "prabavathy2026",      "role": "student", "name": "Prabavathy S", "subject":"Science Biology"},
 }
 
-# ─────────────────────────────────────────────
-# STUDENT STORAGE STRUCTURE
-# ─────────────────────────────────────────────
-
-def create_student_structure(student: str):
-    base = f"storage/students/{student}"
-    for folder in ["tests", "submissions", "attendance", "marks", "activity"]:
-        os.makedirs(f"{base}/{folder}", exist_ok=True)
-
-
-# Create folders for all existing students on startup
-for student in STUDENT_USERS:
-    create_student_structure(student)
 
 # ─────────────────────────────────────────────
 # MODELS
@@ -187,8 +174,6 @@ def create_user(req: CreateUserRequest):
         **(req.extra or {}),
     }
 
-    if utype == "student":
-        create_student_structure(username)
 
     return {"success": True, "username": username, "password": req.password}
 
@@ -316,7 +301,7 @@ async def upload_submission(
     try:
         date = str(datetime.now().date())
         folder = f"storage/students/{student}/submissions/{date}"
-        os.makedirs(folder, exist_ok=True)
+        
 
         filename = f"{title}_{file.filename}"
         filepath = os.path.join(folder, filename)
@@ -766,7 +751,7 @@ def get_tools():
 @app.post("/api/upload-material")
 async def upload_material(file: UploadFile = File(...)):
     folder = "storage/materials"
-    os.makedirs(folder, exist_ok=True)
+    
     filepath = os.path.join(folder, file.filename)
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -811,7 +796,7 @@ async def upload_report(
 
     folder=f"storage/reports/{date}"
 
-    os.makedirs(folder,exist_ok=True)
+    
 
     filepath=os.path.join(
         folder,
@@ -840,7 +825,7 @@ async def upload_gallery(
 
     folder=f"storage/gallery/{date}"
 
-    os.makedirs(folder,exist_ok=True)
+    
 
     filepath=os.path.join(
         folder,
