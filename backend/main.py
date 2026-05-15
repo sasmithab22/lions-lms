@@ -334,24 +334,51 @@ async def upload_submission(
 ):
     try:
         date = str(datetime.now().date())
+
+        # Use temporary Vercel storage
         folder = os.path.join(
-            STORAGE_DIR,
+            "/tmp",
             "students",
             student,
             "submissions",
             date
         )
-        
 
-        filename = f"{title}_{file.filename}"
-        filepath = os.path.join(folder, filename)
+        # Create folder
+        os.makedirs(
+            folder,
+            exist_ok=True
+        )
 
-        with open(filepath, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        filename = (
+            f"{title}_{file.filename}"
+        )
 
-        return {"success": True, "filename": filename}
+        filepath = os.path.join(
+            folder,
+            filename
+        )
+
+        with open(
+            filepath,
+            "wb"
+        ) as buffer:
+            shutil.copyfileobj(
+                file.file,
+                buffer
+            )
+
+        return {
+            "success": True,
+            "filename": filename,
+            "date": date
+        }
+
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 
 @app.get("/api/student-submissions/{student}")
@@ -414,16 +441,24 @@ def all_submissions():
 
 
 @app.get("/api/download-submission/{student}/{date}/{filename}")
-def download_submission(student: str, date: str, filename: str):
+def download_submission(
+    student: str,
+    date: str,
+    filename: str
+):
     path = os.path.join(
-    STORAGE_DIR,
-    "students",
-    student,
-    "submissions",
-    date,
-    filename
-)
-    return FileResponse(path=path, filename=filename)
+        "/tmp",
+        "students",
+        student,
+        "submissions",
+        date,
+        filename
+    )
+
+    return FileResponse(
+        path=path,
+        filename=filename
+    )
 
 # ─────────────────────────────────────────────
 # ATTENDANCE
