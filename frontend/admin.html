@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --sidebar-bg: #0f172a;
+  --sidebar-width: 260px;
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --text-light: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.brand-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.brand-sub {
+  font-size: 10px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-top: 2px;
+}
+
+.user-card {
+  margin: 16px 12px 0;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-info-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-info-role {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: capitalize;
+}
+
+/* NAV */
+.nav-section {
+  padding: 20px 12px 0;
+  flex: 1;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #334155;
+  padding: 0 8px;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.nav-item .nav-icon {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: #e2e8f0;
+}
+
+.nav-item.active {
+  background: rgba(99,102,241,0.15);
+  color: #a5b4fc;
+}
+
+.nav-item.active .nav-icon { filter: none; }
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  background: rgba(239,68,68,0.1);
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky; top: 0;
+  z-index: 50;
+}
+
+.topbar-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-admin    { background: #ede9fe; color: #7c3aed; }
+.badge-school   { background: #dbeafe; color: #1d4ed8; }
+.badge-staff    { background: #dcfce7; color: #166534; }
+.badge-student  { background: #fef3c7; color: #92400e; }
+
+.content {
+  padding: 32px;
+  flex: 1;
+}
+
+/* ── STAT CARDS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow .2s;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+}
+
+.stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.stat-icon.purple { background: #ede9fe; }
+.stat-icon.blue   { background: #dbeafe; }
+.stat-icon.green  { background: #dcfce7; }
+.stat-icon.amber  { background: #fef3c7; }
+.stat-icon.pink   { background: #fce7f3; }
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* ── PANELS / TABS ── */
+.tabs-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 5px;
+  width: fit-content;
+}
+
+.tab-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+}
+
+.tab-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── FORM ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 13px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  transition: border .2s;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  background: #fff;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(99,102,241,0.25);
+}
+
+.btn-primary:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+/* ── TABLE ── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  background: var(--bg);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody td {
+  padding: 13px 16px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:hover td { background: #f8fafc; }
+
+/* ── ALERTS ── */
+.cred-box {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #166534;
+  margin-top: 14px;
+  display: none;
+}
+
+.err-box {
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #991b1b;
+  margin-top: 14px;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <div class="brand-name">EduPortal</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="user-card">
+      <div class="user-avatar" id="avatarLetter">A</div>
+      <div>
+        <div class="user-info-name" id="sidebarName">Administrator</div>
+        <div class="user-info-role">Admin</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Management</div>
+    <button class="nav-item active" onclick="showTab('schools', this)">
+      <span class="nav-icon">🏛️</span> Schools
+    </button>
+    <button class="nav-item" onclick="showTab('staff', this)">
+      <span class="nav-icon">👩‍🏫</span> Staff
+    </button>
+    <button class="nav-item" onclick="showTab('students', this)">
+      <span class="nav-icon">🎒</span> Students
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="logout()">
+      <span>🚪</span> Logout
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Schools</div>
+    <div class="topbar-right">
+      <span class="badge badge-admin">Admin</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- SCHOOLS TAB -->
+    <div class="panel active" id="tab-schools">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">➕ Create School Account</div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>School Name</label>
+            <input id="s-name" placeholder="e.g. Sunrise Academy"/>
+          </div>
+          <div class="field">
+            <label>Username</label>
+            <input id="s-username" placeholder="e.g. sunrise_school"/>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input id="s-pass" placeholder="Password"/>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" style="width:100%" onclick="createUser('school')">
+              Create Account
+            </button>
+          </div>
+        </div>
+        <div class="cred-box" id="cred-school"></div>
+        <div class="err-box"  id="err-school"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏛️ All Schools</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>School Name</th><th>Username</th><th>Password</th>
+              </tr>
+            </thead>
+            <tbody id="school-list">
+              <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAFF TAB -->
+    <div class="panel" id="tab-staff">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">➕ Create Staff Account</div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Full Name</label>
+            <input id="st-name" placeholder="Full Name"/>
+          </div>
+          <div class="field">
+            <label>Username</label>
+            <input id="st-username" placeholder="Username"/>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input id="st-pass" placeholder="Password"/>
+          </div>
+          <div class="field">
+            <label>Subject</label>
+            <input id="st-subject" placeholder="e.g. Mathematics"/>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" style="width:100%" onclick="createUser('staff')">
+              Create Account
+            </button>
+          </div>
+        </div>
+        <div class="cred-box" id="cred-staff"></div>
+        <div class="err-box"  id="err-staff"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👩‍🏫 All Staff</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Name</th><th>Username</th><th>Password</th><th>Subject</th>
+              </tr>
+            </thead>
+            <tbody id="staff-list">
+              <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:30px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENTS TAB -->
+    <div class="panel" id="tab-students">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">➕ Create Student Account</div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Full Name</label>
+            <input id="stu-name" placeholder="Full Name"/>
+          </div>
+          <div class="field">
+            <label>Username</label>
+            <input id="stu-username" placeholder="Username"/>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input id="stu-pass" placeholder="Password"/>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" style="width:100%" onclick="createUser('student')">
+              Create Account
+            </button>
+          </div>
+        </div>
+        <div class="cred-box" id="cred-student"></div>
+        <div class="err-box"  id="err-student"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎒 All Students</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Name</th><th>Username</th><th>Password</th>
+              </tr>
+            </thead>
+            <tbody id="student-list">
+              <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+
+if (!user.role || user.role !== 'admin') {
+  window.location.href = '/';
+}
+
+document.getElementById('sidebarName').textContent = user.name || 'Admin';
+document.getElementById('avatarLetter').textContent = (user.name || 'A')[0].toUpperCase();
+
+const tabTitles = { schools: 'Schools', staff: 'Staff Management', students: 'Students' };
+
+function showTab(tab, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = tabTitles[tab];
+  loadList(tab === 'schools' ? 'school' : tab === 'staff' ? 'staff' : 'student');
+}
+
+async function createUser(type) {
+  let payload = { user_type: type };
+  const credEl = document.getElementById('cred-' + type);
+  const errEl  = document.getElementById('err-' + type);
+  credEl.style.display = 'none';
+  errEl.style.display  = 'none';
+
+  if (type === 'school') {
+    payload.name     = document.getElementById('s-name').value.trim();
+    payload.username = document.getElementById('s-username').value.trim();
+    payload.password = document.getElementById('s-pass').value.trim();
+    payload.extra    = {};
+  } else if (type === 'staff') {
+    payload.name     = document.getElementById('st-name').value.trim();
+    payload.username = document.getElementById('st-username').value.trim();
+    payload.password = document.getElementById('st-pass').value.trim();
+    payload.extra    = { subject: document.getElementById('st-subject').value.trim() };
+  } else {
+    payload.name     = document.getElementById('stu-name').value.trim();
+    payload.username = document.getElementById('stu-username').value.trim();
+    payload.password = document.getElementById('stu-pass').value.trim();
+    payload.extra    = {};
+  }
+
+  if (!payload.name || !payload.username || !payload.password) {
+    errEl.textContent = 'Please fill all required fields';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res  = await fetch('/api/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errEl.textContent = data.detail || 'Error creating account';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    credEl.innerHTML = `✅ Account created! &nbsp; Username: <strong>${data.username}</strong> &nbsp;|&nbsp; Password: <strong>${data.password}</strong>`;
+    credEl.style.display = 'block';
+    loadList(type);
+  } catch(e) {
+    errEl.textContent = 'Server error. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+async function loadList(type) {
+  try {
+    const res  = await fetch('/api/users/' + type);
+    const list = await res.json();
+    let tbody, html = '';
+
+    if (type === 'school') {
+      tbody = document.getElementById('school-list');
+      list.forEach((u, i) => {
+        html += `<tr>
+          <td style="color:#94a3b8">${i + 1}</td>
+          <td style="font-weight:600">${u.name}</td>
+          <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:12px">${u.username}</code></td>
+          <td style="color:#94a3b8">${u.password}</td>
+        </tr>`;
+      });
+    } else if (type === 'staff') {
+      tbody = document.getElementById('staff-list');
+      list.forEach((u, i) => {
+        html += `<tr>
+          <td style="color:#94a3b8">${i + 1}</td>
+          <td style="font-weight:600">${u.name}</td>
+          <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:12px">${u.username}</code></td>
+          <td style="color:#94a3b8">${u.password}</td>
+          <td><span class="badge badge-staff">${u.subject || '-'}</span></td>
+        </tr>`;
+      });
+    } else {
+      tbody = document.getElementById('student-list');
+      list.forEach((u, i) => {
+        html += `<tr>
+          <td style="color:#94a3b8">${i + 1}</td>
+          <td style="font-weight:600">${u.name}</td>
+          <td><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:12px">${u.username}</code></td>
+          <td style="color:#94a3b8">${u.password}</td>
+        </tr>`;
+      });
+    }
+
+    tbody.innerHTML = html || `<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:30px">No records yet</td></tr>`;
+  } catch(e) {}
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = '/';
+}
+
+loadList('school');
+</script>
+</body>
+</html>

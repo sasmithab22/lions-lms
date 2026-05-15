@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>School Dashboard – EduPortal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --sidebar-bg: #0f172a;
+  --sidebar-width: 260px;
+  --accent: #3b82f6;
+  --accent2: #2563eb;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); min-height: 100vh; }
+
+.sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); min-height: 100vh; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; z-index: 100; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.brand-name { font-size: 17px; font-weight: 800; color: #fff; }
+.brand-sub { font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px; }
+.user-card { margin: 14px 12px 0; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; font-weight: 700; flex-shrink: 0; }
+.user-info-name { font-size: 13px; font-weight: 700; color: #f1f5f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-info-role { font-size: 11px; color: #64748b; }
+.nav-section { padding: 20px 12px 0; flex: 1; overflow-y: auto; }
+.nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #334155; padding: 0 8px; margin-bottom: 6px; margin-top: 16px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+.nav-item .nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.nav-item.active { background: rgba(59,130,246,0.15); color: #93c5fd; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #ef4444; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+.logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+.main { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box; }
+.topbar { height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 50; }
+.topbar-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.badge { display: inline-flex; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge-school { background: #dbeafe; color: #1d4ed8; }
+
+.content { padding: 32px; width: 100%; box-sizing: border-box; }
+.panel { display: none; width: 100%; box-sizing: border-box; }
+.panel.active { display: block; width: 100%; box-sizing: border-box; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border-radius: 16px; padding: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+.stat-icon { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.stat-icon.blue   { background: #dbeafe; }
+.stat-icon.green  { background: #dcfce7; }
+.stat-icon.purple { background: #ede9fe; }
+.stat-icon.amber  { background: #fef3c7; }
+.stat-icon.red    { background: #fee2e2; }
+.stat-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+.card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { background: var(--bg); color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody td { padding: 13px 16px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg); }
+
+.pill { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.pill-green { background: #dcfce7; color: #166534; }
+.pill-red   { background: #fee2e2; color: #991b1b; }
+.pill-gray  { background: #f1f5f9; color: #64748b; }
+.pill-blue  { background: #dbeafe; color: #1d4ed8; }
+
+.btn { padding: 9px 18px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+
+.date-input { background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 13px; font-size: 13px; font-family: inherit; color: var(--text); outline: none; }
+.date-input:focus { border-color: var(--accent); }
+
+.pill-gold   { background: #fef9c3; color: #854d0e; }
+.pill-sky    { background: #e0f2fe; color: #075985; }
+.pill-rose   { background: #ffe4e6; color: #9f1239; }
+
+/* GALLERY */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.gallery-item { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: transform .2s, box-shadow .2s; }
+.gallery-item:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.gallery-item img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.gallery-item-meta { padding: 10px 12px; font-size: 11px; color: var(--muted); font-weight: 600; }
+
+/* REPORTS */
+.report-list { display: flex; flex-direction: column; gap: 10px; }
+.report-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; }
+.report-icon { font-size: 24px; flex-shrink: 0; }
+.report-info { flex: 1; }
+.report-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.report-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* INSIGHTS */
+.insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.insight-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px; }
+.insight-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 10px; }
+.insight-value { font-size: 28px; font-weight: 800; color: var(--text); }
+.insight-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.progress-bar-bg { height: 6px; background: var(--border); border-radius: 99px; margin-top: 12px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+
+/* TOOLS LEARNT */
+.tools-section { width: 100%; }
+.tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; width: 100%; }
+@media (max-width: 1100px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px)  { .tools-grid { grid-template-columns: 1fr; } }
+.tool-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 22px 22px 20px; transition: box-shadow .2s, transform .2s; width: 100%; box-sizing: border-box; }
+.tool-tile:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.tool-tile-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.tool-logo { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.tool-name { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.tool-category { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-top: 2px; }
+.tool-learnt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+.tool-learnt-list { display: flex; flex-direction: column; gap: 6px; }
+.tool-learnt-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #334155; line-height: 1.45; }
+.tool-learnt-item::before { content: '✓'; color: var(--accent); font-weight: 800; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+.tool-tile .tool-logo.purple { background: #ede9fe; }
+.tool-tile .tool-logo.blue   { background: #dbeafe; }
+.tool-tile .tool-logo.green  { background: #dcfce7; }
+.tool-tile .tool-logo.amber  { background: #fef3c7; }
+.tool-tile .tool-logo.rose   { background: #ffe4e6; }
+.tool-tile .tool-logo.sky    { background: #e0f2fe; }
+.tool-tile .tool-logo.teal   { background: #ccfbf1; }
+.tool-tile .tool-logo.slate  { background: #f1f5f9; }
+
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center; }
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+.lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* FILTER BAR */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; }
+.filter-bar input, .filter-bar select { background: var(--surface); border: 1.5px solid var(--border); border-radius: 9px; padding: 8px 12px; font-size: 13px; font-family: inherit; color: var(--text); outline: none; transition: border .15s; height: 36px; }
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+.filter-bar input[type="text"] { min-width: 160px; }
+.filter-bar input[type="date"] { min-width: 140px; }
+.filter-bar select { min-width: 120px; }
+.filter-bar .btn-sm { padding: 7px 14px; font-size: 12px; height: 36px; border-radius: 8px; }
+.filter-clear { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; height: 36px; transition: all .15s; }
+.filter-clear:hover { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.filter-count { font-size: 12px; color: var(--muted); margin-left: auto; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon">🏛️</div>
+      <div>
+        <div class="brand-name">EduPortal</div>
+        <div class="brand-sub">School Panel</div>
+      </div>
+    </div>
+    <div class="user-card">
+      <div class="user-avatar" id="avatarLetter">S</div>
+      <div>
+        <div class="user-info-name" id="sidebarName">School</div>
+        <div class="user-info-role">School Admin</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Analytics</div>
+    <button class="nav-item active" onclick="showTab('overview', this)"><span class="nav-icon">📊</span> Overview</button>
+    <button class="nav-item" onclick="showTab('students', this)"><span class="nav-icon">🎒</span> Student Report</button>
+    <button class="nav-item" onclick="showTab('datereport', this)"><span class="nav-icon">📅</span> Date Report</button>
+    <div class="nav-label">Content</div>
+    <button class="nav-item" onclick="showTab('gallery', this)"><span class="nav-icon">🖼️</span> Gallery</button>
+    <button class="nav-item" onclick="showTab('reports', this)"><span class="nav-icon">📁</span> Reports</button>
+    <div class="nav-label">Insights</div>
+    <button class="nav-item" onclick="showTab('insights', this)"><span class="nav-icon">💡</span> School Insights</button>
+    <button class="nav-item" onclick="showTab('tools', this)"><span class="nav-icon">🛠️</span> Tools Learnt</button>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="logout()"><span>🚪</span> Logout</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">School Overview</div>
+    <span class="badge badge-school">School</span>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue">👨‍🎓</div><div><div class="stat-value" id="studentsCount">—</div><div class="stat-label">Total Students</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">📝</div><div><div class="stat-value" id="testsCount">—</div><div class="stat-label">Tests Taken</div></div></div>
+        <div class="stat-card"><div class="stat-icon amber">📅</div><div><div class="stat-value" id="attendanceCount">—</div><div class="stat-label">Attendance %</div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">⭐</div><div><div class="stat-value" id="marksCount">—</div><div class="stat-label">Average Marks</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏛️ School Information</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:8px">
+          <div style="background:#f8fafc;border-radius:12px;padding:16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;margin-bottom:6px">School Name</div>
+            <div style="font-size:16px;font-weight:800;color:#0f172a" id="schoolNameDisplay">—</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:12px;padding:16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;margin-bottom:6px">Role</div>
+            <div style="font-size:16px;font-weight:800;color:#0f172a">School Administrator</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENT REPORT -->
+    <div class="panel" id="panel-students">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Student Performance Report</div>
+          <span id="studentReportCount" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="filterName" placeholder="🔍 Search by name…" oninput="applyStudentFilters()"/>
+          <select id="filterSubject" onchange="applyStudentFilters()">
+            <option value="">All Subjects</option>
+          </select>
+          <select id="filterMarksRange" onchange="applyStudentFilters()">
+            <option value="">All Marks</option>
+            <option value="80-100">80–100 (Excellent)</option>
+            <option value="60-79">60–79 (Good)</option>
+            <option value="40-59">40–59 (Average)</option>
+            <option value="0-39">0–39 (Needs Work)</option>
+          </select>
+          <select id="filterAttendance" onchange="applyStudentFilters()">
+            <option value="">All Attendance</option>
+            <option value="high">≥ 90% (High)</option>
+            <option value="med">75–89% (Medium)</option>
+            <option value="low">&lt; 75% (Low)</option>
+          </select>
+          <button class="filter-clear" onclick="clearStudentFilters()">✕ Clear</button>
+          <span class="filter-count" id="studentFilterCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="reportTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>Subject</th>
+                <th>Avg Marks</th>
+                <th>Attendance</th>
+                <th>Tests Done</th>
+                <th>Remark</th>
+              </tr>
+            </thead>
+            <tbody><tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATE REPORT -->
+    <div class="panel" id="panel-datereport">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📅 Date-wise Student Report</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px">
+          <input type="date" id="reportDate" class="date-input"/>
+          <button class="btn btn-primary" onclick="loadDateReport()">Load Report</button>
+        </div>
+        <div class="filter-bar" id="dateReportFilterBar" style="display:none">
+          <input type="text" id="drFilterName" placeholder="🔍 Search name…" oninput="applyDateReportFilters()"/>
+          <select id="drFilterSubject" onchange="applyDateReportFilters()">
+            <option value="">All Subjects</option>
+          </select>
+          <select id="drFilterAttendance" onchange="applyDateReportFilters()">
+            <option value="">All Status</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+          </select>
+          <select id="drFilterMarks" onchange="applyDateReportFilters()">
+            <option value="">All Marks</option>
+            <option value="80-100">80–100</option>
+            <option value="60-79">60–79</option>
+            <option value="40-59">40–59</option>
+            <option value="0-39">0–39</option>
+          </select>
+          <button class="filter-clear" onclick="clearDateReportFilters()">✕ Clear</button>
+          <span class="filter-count" id="drFilterCount"></span>
+        </div>
+        <div id="dateReportStats" class="stats-grid" style="display:none;margin-bottom:20px"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Subject</th><th>Attendance</th><th>Marks</th></tr></thead>
+            <tbody id="dateReportBody"><tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px">Select a date and click Load Report.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="panel" id="panel-gallery">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🖼️ Photo Gallery</div>
+          <span id="galleryCount" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div class="filter-bar">
+          <input type="date" id="galleryDateFrom" onchange="applyGalleryFilter()"/>
+          <span style="font-size:13px;color:var(--muted);font-weight:600">to</span>
+          <input type="date" id="galleryDateTo" onchange="applyGalleryFilter()"/>
+          <button class="filter-clear" onclick="clearGalleryFilter()">✕ Clear</button>
+          <span class="filter-count" id="galleryFilterCount"></span>
+        </div>
+        <div id="galleryGrid" class="gallery-grid">
+          <div style="color:#94a3b8;padding:20px 0;text-align:center">Loading gallery…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="panel" id="panel-reports">
+      <div class="card">
+        <div class="card-title">📁 Uploaded Reports</div>
+        <div class="filter-bar">
+          <input type="date" id="reportDateFrom" onchange="applyReportsFilter()"/>
+          <span style="font-size:13px;color:var(--muted);font-weight:600">to</span>
+          <input type="date" id="reportDateTo" onchange="applyReportsFilter()"/>
+          <button class="filter-clear" onclick="clearReportsFilter()">✕ Clear</button>
+          <span class="filter-count" id="reportsFilterCount"></span>
+        </div>
+        <div id="reportsList" class="report-list">
+          <div style="color:#94a3b8;padding:20px 0;text-align:center">Loading reports…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="panel" id="panel-insights">
+      <div id="insightsContent">
+        <div style="color:#94a3b8;padding:30px;text-align:center">Loading insights…</div>
+      </div>
+    </div>
+    <!-- TOOLS LEARNT -->
+    <div class="panel" id="panel-tools" >
+      <div class="card" >
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px">🛠️ Digital Tools Learnt</div>
+        <div style="font-size:13px;color:var(--muted)">All digital tools introduced to students during the programme — tool name, category, and key learning outcomes.</div>
+      </div>
+      <div class="tools-grid" id="toolsGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+    
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt=""/>
+</div>
+
+<script>
+const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+if (!user.role || user.role !== 'school') window.location.href = '/';
+
+document.getElementById('sidebarName').textContent     = user.name || 'School';
+document.getElementById('avatarLetter').textContent    = (user.name || 'S')[0].toUpperCase();
+document.getElementById('schoolNameDisplay').textContent = user.name || '—';
+
+const tabTitles = {
+  overview: 'School Overview', students: 'Student Report', datereport: 'Date Report',
+  gallery: 'Photo Gallery', reports: 'Reports', insights: 'School Insights', tools: 'Tools Learnt'
+};
+const loaded = {};
+
+function showTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = tabTitles[name];
+  if (!loaded[name]) { loaded[name] = true; lazyLoad(name); }
+}
+
+function lazyLoad(name) {
+  if (name === 'students')  loadStudentReport();
+  if (name === 'gallery')   loadGallery();
+  if (name === 'reports')   loadReports();
+  if (name === 'insights')  loadInsights();
+}
+
+function logout() { sessionStorage.clear(); window.location.href = '/'; }
+
+/* OVERVIEW */
+async function loadAnalytics() {
+  try {
+    const res  = await fetch('/api/school-analytics');
+    const data = await res.json();
+    if (!data.summary) return;
+    document.getElementById('studentsCount').textContent   = data.summary.students;
+    document.getElementById('testsCount').textContent      = data.summary.tests;
+    document.getElementById('attendanceCount').textContent = data.summary.attendance + '%';
+    document.getElementById('marksCount').textContent      = data.summary.marks;
+  } catch(e) {}
+}
+
+/* STUDENT REPORT */
+let allStudentData = [];
+
+async function loadStudentReport() {
+  try {
+    const res  = await fetch('/api/student-report');
+    allStudentData = await res.json();
+    document.getElementById('studentReportCount').textContent = `${allStudentData.length} student${allStudentData.length !== 1 ? 's' : ''}`;
+
+    // Populate subject dropdown
+    const subjects = [...new Set(allStudentData.map(x => x.subject).filter(Boolean))].sort();
+    const subSel = document.getElementById('filterSubject');
+    subSel.innerHTML = '<option value="">All Subjects</option>' + subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+
+    renderStudentTable(allStudentData);
+  } catch(e) {
+    document.querySelector('#reportTable tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:30px">Error loading report.</td></tr>';
+  }
+}
+
+function applyStudentFilters() {
+  const name    = document.getElementById('filterName').value.trim().toLowerCase();
+  const subject = document.getElementById('filterSubject').value;
+  const marksR  = document.getElementById('filterMarksRange').value;
+  const attR    = document.getElementById('filterAttendance').value;
+
+  let filtered = allStudentData.filter(x => {
+    if (name    && !x.name.toLowerCase().includes(name)) return false;
+    if (subject && x.subject !== subject) return false;
+    if (marksR) {
+      const [lo, hi] = marksR.split('-').map(Number);
+      const m = x.avg_marks;
+      if (m === null || m < lo || m > hi) return false;
+    }
+    if (attR) {
+      const a = x.attendance_pct;
+      if (attR === 'high' && (a === null || a < 90)) return false;
+      if (attR === 'med'  && (a === null || a < 75 || a >= 90)) return false;
+      if (attR === 'low'  && (a === null || a >= 75)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('studentFilterCount').textContent = `${filtered.length} of ${allStudentData.length} shown`;
+  renderStudentTable(filtered);
+}
+
+function clearStudentFilters() {
+  document.getElementById('filterName').value = '';
+  document.getElementById('filterSubject').value = '';
+  document.getElementById('filterMarksRange').value = '';
+  document.getElementById('filterAttendance').value = '';
+  document.getElementById('studentFilterCount').textContent = '';
+  renderStudentTable(allStudentData);
+}
+
+function renderStudentTable(data) {
+  function getRemark(marks, att) {
+    if (marks !== null && att !== null) {
+      if (marks >= 80 && att >= 90) return { label: '🌟 Excellent',     cls: 'pill-green' };
+      if (marks >= 70 && att >= 75) return { label: '✅ Good',          cls: 'pill-blue'  };
+      if (marks >= 50 && att >= 75) return { label: '📈 Satisfactory',  cls: 'pill-sky'   };
+      if (marks >= 50 && att < 75)  return { label: '⚠️ Low Attendance', cls: 'pill-gold'  };
+      if (marks < 50  && att >= 75) return { label: '📖 Needs Improvement', cls: 'pill-gold' };
+      return                               { label: '🔴 At Risk',        cls: 'pill-rose'  };
+    }
+    if (marks !== null) {
+      if (marks >= 80) return { label: '🌟 Excellent',     cls: 'pill-green' };
+      if (marks >= 60) return { label: '✅ Good',          cls: 'pill-blue'  };
+      if (marks >= 40) return { label: '📈 Satisfactory',  cls: 'pill-sky'   };
+      return                  { label: '📖 Needs Improvement', cls: 'pill-gold' };
+    }
+    if (att !== null) {
+      if (att >= 90) return { label: '📅 Good Attendance', cls: 'pill-green' };
+      if (att >= 75) return { label: '📅 Avg Attendance',  cls: 'pill-blue'  };
+      return                { label: '⚠️ Low Attendance',  cls: 'pill-gold'  };
+    }
+    return { label: '— No Data', cls: 'pill-gray' };
+  }
+
+  let html = '';
+  data.forEach((x, i) => {
+    const remark = getRemark(x.avg_marks, x.attendance_pct);
+    const marks  = x.avg_marks !== null ? `<span style="font-weight:800;color:#3b82f6">${x.avg_marks}</span>` : '<span style="color:#94a3b8">—</span>';
+    const att    = x.attendance_pct !== null ? `${x.attendance_pct}%` : '<span style="color:#94a3b8">—</span>';
+    html += `<tr>
+      <td style="color:#94a3b8;font-weight:600">${i + 1}</td>
+      <td style="font-weight:700">${x.name}</td>
+      <td><span class="pill pill-blue" style="font-weight:600">${x.subject}</span></td>
+      <td>${marks}</td>
+      <td>${att}</td>
+      <td style="font-weight:600">${x.tests_completed}</td>
+      <td><span class="pill ${remark.cls}">${remark.label}</span></td>
+    </tr>`;
+  });
+  document.querySelector('#reportTable tbody').innerHTML = html || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">No students match the filters.</td></tr>';
+}
+
+/* DATE REPORT */
+let allDateReportData = [];
+
+async function loadDateReport() {
+  const date = document.getElementById('reportDate').value;
+  if (!date) { alert('Please select a date'); return; }
+  try {
+    const res  = await fetch(`/api/date-report/${date}`);
+    allDateReportData = await res.json();
+
+    // Populate subject dropdown
+    const subjects = [...new Set(allDateReportData.map(x => x.subject).filter(Boolean))].sort();
+    const subSel = document.getElementById('drFilterSubject');
+    subSel.innerHTML = '<option value="">All Subjects</option>' + subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+
+    // Show filter bar and stats
+    document.getElementById('dateReportFilterBar').style.display = 'flex';
+    renderDateReport(allDateReportData);
+  } catch(e) {
+    document.getElementById('dateReportBody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ef4444;padding:30px">Error loading report.</td></tr>';
+  }
+}
+
+function applyDateReportFilters() {
+  const name   = document.getElementById('drFilterName').value.trim().toLowerCase();
+  const subj   = document.getElementById('drFilterSubject').value;
+  const att    = document.getElementById('drFilterAttendance').value;
+  const marksR = document.getElementById('drFilterMarks').value;
+
+  let filtered = allDateReportData.filter(x => {
+    if (name && !x.student.toLowerCase().includes(name)) return false;
+    if (subj && x.subject !== subj) return false;
+    if (att  && x.attendance !== att) return false;
+    if (marksR) {
+      const [lo, hi] = marksR.split('-').map(Number);
+      const allVals = typeof x.marks === 'object' && x.marks !== '-' ? Object.values(x.marks) : [];
+      const avg = allVals.length ? allVals.reduce((a,b)=>a+b,0)/allVals.length : null;
+      if (avg === null || avg < lo || avg > hi) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('drFilterCount').textContent = `${filtered.length} of ${allDateReportData.length} shown`;
+  renderDateReport(filtered);
+}
+
+function clearDateReportFilters() {
+  document.getElementById('drFilterName').value = '';
+  document.getElementById('drFilterSubject').value = '';
+  document.getElementById('drFilterAttendance').value = '';
+  document.getElementById('drFilterMarks').value = '';
+  document.getElementById('drFilterCount').textContent = '';
+  renderDateReport(allDateReportData);
+}
+
+function renderDateReport(data) {
+  let present = 0, totalMarks = 0, markCount = 0;
+  let html = '';
+  data.forEach(x => {
+    if (x.attendance === 'Present') present++;
+    let marksDisplay = x.marks;
+    if (typeof x.marks === 'object' && x.marks !== '-') {
+      marksDisplay = Object.entries(x.marks).map(([subj, val]) => { totalMarks += val; markCount++; return `${subj}: <b>${val}</b>`; }).join(', ');
+    }
+    const attPill = x.attendance === 'Present'
+      ? `<span class="pill pill-green">Present</span>`
+      : x.attendance === 'Absent'
+      ? `<span class="pill pill-red">Absent</span>`
+      : `<span class="pill pill-gray">—</span>`;
+    html += `<tr>
+      <td style="font-weight:600">${x.student}</td>
+      <td>${x.subject}</td>
+      <td>${attPill}</td>
+      <td style="color:#3b82f6;font-weight:600">${marksDisplay}</td>
+    </tr>`;
+  });
+
+  document.getElementById('dateReportBody').innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px">No data matches the filters.</td></tr>';
+
+  const attPct = data.length ? Math.round((present / data.length) * 100) : 0;
+  const avgMark = markCount ? (totalMarks / markCount).toFixed(1) : '—';
+  const statsEl = document.getElementById('dateReportStats');
+  statsEl.style.display = 'grid';
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-icon blue">📚</div><div><div class="stat-value">${attPct}%</div><div class="stat-label">Attendance</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">🎯</div><div><div class="stat-value">${avgMark}</div><div class="stat-label">Avg Marks</div></div></div>
+    <div class="stat-card"><div class="stat-icon purple">👥</div><div><div class="stat-value">${data.length}</div><div class="stat-label">Students</div></div></div>`;
+}
+
+/* GALLERY */
+let allGalleryData = [];
+
+async function loadGallery() {
+  try {
+    const res  = await fetch('/api/gallery');
+    allGalleryData = await res.json();
+    if (!allGalleryData.length) {
+      document.getElementById('galleryGrid').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No photos in gallery yet.</div>';
+      return;
+    }
+    renderGallery(allGalleryData);
+  } catch(e) {
+    document.getElementById('galleryGrid').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">Could not load gallery.</div>';
+  }
+}
+
+function applyGalleryFilter() {
+  const from = document.getElementById('galleryDateFrom').value;
+  const to   = document.getElementById('galleryDateTo').value;
+  let filtered = allGalleryData.filter(g => {
+    if (from && g.date < from) return false;
+    if (to   && g.date > to)   return false;
+    return true;
+  });
+  document.getElementById('galleryFilterCount').textContent = `${filtered.length} of ${allGalleryData.length} shown`;
+  renderGallery(filtered);
+}
+
+function clearGalleryFilter() {
+  document.getElementById('galleryDateFrom').value = '';
+  document.getElementById('galleryDateTo').value   = '';
+  document.getElementById('galleryFilterCount').textContent = '';
+  renderGallery(allGalleryData);
+}
+
+function renderGallery(data) {
+  document.getElementById('galleryCount').textContent = `${data.length} photo${data.length !== 1 ? 's' : ''}`;
+  if (!data.length) {
+    document.getElementById('galleryGrid').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No photos match the selected dates.</div>';
+    return;
+  }
+  let html = '';
+  data.forEach(g => {
+    html += `<div class="gallery-item" onclick="openLightbox('${g.url}')">
+      <img src="${g.url}" alt="${g.file}" loading="lazy" onerror="this.parentElement.style.display='none'"/>
+      <div class="gallery-item-meta">📅 ${g.date} · ${g.file}</div>
+    </div>`;
+  });
+  document.getElementById('galleryGrid').innerHTML = html;
+}
+
+function openLightbox(url) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+/* REPORTS */
+let allReportsData = [];
+
+async function loadReports() {
+  try {
+    const res  = await fetch('/api/reports');
+    allReportsData = await res.json();
+    if (!allReportsData.length) {
+      document.getElementById('reportsList').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No reports uploaded yet.</div>';
+      return;
+    }
+    renderReports(allReportsData);
+  } catch(e) {
+    document.getElementById('reportsList').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">Could not load reports.</div>';
+  }
+}
+
+function applyReportsFilter() {
+  const from = document.getElementById('reportDateFrom').value;
+  const to   = document.getElementById('reportDateTo').value;
+  let filtered = allReportsData.filter(r => {
+    if (from && r.date < from) return false;
+    if (to   && r.date > to)   return false;
+    return true;
+  });
+  document.getElementById('reportsFilterCount').textContent = `${filtered.length} of ${allReportsData.length} shown`;
+  renderReports(filtered);
+}
+
+function clearReportsFilter() {
+  document.getElementById('reportDateFrom').value = '';
+  document.getElementById('reportDateTo').value   = '';
+  document.getElementById('reportsFilterCount').textContent = '';
+  renderReports(allReportsData);
+}
+
+function renderReports(data) {
+  if (!data.length) {
+    document.getElementById('reportsList').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No reports match the selected dates.</div>';
+    return;
+  }
+  let html = '';
+  data.forEach(r => {
+    const ext  = r.filename.split('.').pop().toLowerCase();
+    const icon = ext === 'pdf' ? '📄' : ext === 'xlsx' || ext === 'xls' ? '📊' : '📁';
+    const size = r.size > 1024 * 1024 ? (r.size / 1024 / 1024).toFixed(1) + ' MB' : (r.size / 1024).toFixed(0) + ' KB';
+    html += `<div class="report-item">
+      <div class="report-icon">${icon}</div>
+      <div class="report-info">
+        <div class="report-name">${r.filename}</div>
+        <div class="report-meta">📅 ${r.date} · ${size}</div>
+      </div>
+      <a class="btn btn-primary" href="${r.url}" download="${r.filename}" target="_blank" style="text-decoration:none;font-size:12px;padding:7px 14px;">⬇ Download</a>
+    </div>`;
+  });
+  document.getElementById('reportsList').innerHTML = html;
+}
+
+/* INSIGHTS */
+async function loadInsights() {
+  try {
+    const res  = await fetch('/api/school-analytics');
+    const data = await res.json();
+    if (!data.summary) { document.getElementById('insightsContent').innerHTML = '<div style="color:#94a3b8;padding:30px;text-align:center">No data available yet.</div>'; return; }
+
+    const s = data.summary;
+    const students = data.students || [];
+
+    // Top performers
+    const markedStudents = students.filter(x => x.marks !== '-').sort((a, b) => b.marks - a.marks);
+    const top3 = markedStudents.slice(0, 3);
+
+    // Attendance breakdown
+    const presentCount = students.filter(x => x.attendance === 'Present').length;
+    const absentCount  = students.filter(x => x.attendance === 'Absent').length;
+
+    const tips = [];
+    if (s.attendance < 75) tips.push('⚠️ Overall school attendance is below 75%. Consider follow-up with frequent absentees.');
+    if (s.marks > 0 && s.marks < 50) tips.push('📖 Average class marks are low. Review teaching strategies and provide extra support.');
+    if (s.attendance >= 90) tips.push('🌟 Excellent school-wide attendance rate! Students are engaged.');
+    if (s.marks >= 75) tips.push('🏆 Strong average marks across the school. Great academic performance!');
+    if (s.tests === 0) tips.push('📝 No tests have been completed yet. Encourage students to take available tests.');
+    if (!tips.length) tips.push('📊 School performance looks steady. Continue monitoring attendance and marks regularly.');
+
+    document.getElementById('insightsContent').innerHTML = `
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-title">Attendance Rate</div>
+          <div class="insight-value" style="color:${s.attendance >= 75 ? '#10b981' : '#ef4444'}">${s.attendance}%</div>
+          <div class="insight-sub">${presentCount} present · ${absentCount} absent (latest)</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${s.attendance}%;background:${s.attendance >= 75 ? '#10b981' : '#ef4444'}"></div></div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">Average Marks</div>
+          <div class="insight-value" style="color:${s.marks >= 70 ? '#10b981' : s.marks >= 50 ? '#f59e0b' : '#ef4444'}">${s.marks || '—'}</div>
+          <div class="insight-sub">Across all recorded assessments</div>
+          ${s.marks ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(s.marks,100)}%;background:#3b82f6"></div></div>` : ''}
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">Total Students</div>
+          <div class="insight-value">${s.students}</div>
+          <div class="insight-sub">${s.tests} test submissions total</div>
+        </div>
+      </div>
+
+      ${top3.length ? `<div class="card">
+        <div class="card-title">🏆 Top Performers</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rank</th><th>Student</th><th>Avg Marks</th></tr></thead>
+            <tbody>
+              ${top3.map((s, i) => `<tr>
+                <td><span class="pill ${i===0?'pill-green':i===1?'pill-blue':'pill-gray'}">#${i+1}</span></td>
+                <td style="font-weight:600">${s.student}</td>
+                <td><span style="font-weight:800;color:#3b82f6">${s.marks}</span></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>` : ''}
+
+      <div class="card">
+        <div class="card-title">💡 Insights & Recommendations</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${tips.map(t => `<div style="padding:12px 16px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-size:13px;color:var(--text)">${t}</div>`).join('')}
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('insightsContent').innerHTML = '<div style="color:#94a3b8;padding:30px;text-align:center">Could not load insights.</div>';
+  }
+}
+
+/* TOOLS LEARNT */
+async function renderTools() {
+  const grid = document.getElementById('toolsGrid');
+  grid.innerHTML = '<div style="color:#94a3b8;padding:30px;text-align:center">Loading tools…</div>';
+  try {
+    const res   = await fetch('/api/tools');
+    const tools = await res.json();
+    grid.innerHTML = tools.map(t => `
+      <div class="tool-tile">
+        <div class="tool-tile-top">
+          <div class="tool-logo ${t.color}">${t.icon}</div>
+          <div>
+            <div class="tool-name">${t.name}</div>
+            <div class="tool-category">${t.category}</div>
+          </div>
+        </div>
+        <div class="tool-learnt-label">What was learnt</div>
+        <div class="tool-learnt-list">
+          ${t.learnt.map(l => `<div class="tool-learnt-item">${l}</div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    grid.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center">Could not load tools.</div>';
+  }
+}
+
+loadAnalytics();
+loaded['overview'] = true;
+renderTools();
+loaded['tools'] = true;
+</script>
+</body>
+</html>

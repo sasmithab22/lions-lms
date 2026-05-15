@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student Dashboard – EduPortal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --sidebar-bg: #0f172a;
+  --sidebar-width: 260px;
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); min-height: 100vh; }
+
+.sidebar { width: var(--sidebar-width); background: var(--sidebar-bg); min-height: 100vh; position: fixed; left: 0; top: 0; bottom: 0; display: flex; flex-direction: column; z-index: 100; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.brand-name { font-size: 17px; font-weight: 800; color: #fff; }
+.brand-sub { font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px; }
+.user-card { margin: 14px 12px 0; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; font-weight: 700; flex-shrink: 0; }
+.user-info-name { font-size: 13px; font-weight: 700; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-info-role { font-size: 11px; color: #64748b; }
+.nav-section { padding: 20px 12px 0; flex: 1; }
+.nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #334155; padding: 0 8px; margin-bottom: 6px; margin-top: 16px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+.nav-item .nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+.nav-item.active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+.sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: #ef4444; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+.logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+.main { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box; }
+.topbar { height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 50; }
+.topbar-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge-student { background: #fef3c7; color: #92400e; }
+
+.content { padding: 32px; width: 100%; box-sizing: border-box; }
+.panel { display: none; width: 100%; box-sizing: border-box; }
+.panel.active { display: block; width: 100%; box-sizing: border-box; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border-radius: 16px; padding: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+.stat-icon { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.stat-icon.purple { background: #ede9fe; }
+.stat-icon.blue   { background: #dbeafe; }
+.stat-icon.green  { background: #dcfce7; }
+.stat-icon.amber  { background: #fef3c7; }
+.stat-value { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+.test-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.test-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: box-shadow .2s; }
+.test-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+.test-card-icon { width: 44px; height: 44px; background: #ede9fe; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 14px; }
+.test-card h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.test-card p { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+.btn { padding: 9px 18px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.25); }
+.btn-primary:hover { background: #4f46e5; }
+.btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+
+.card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+
+.upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; background: var(--bg); margin-bottom: 16px; cursor: pointer; transition: all .2s; }
+.upload-zone:hover { border-color: var(--accent); background: #ede9fe22; }
+.field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); display: block; margin-bottom: 6px; }
+.field input[type="text"] { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 13px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; transition: border .2s; margin-bottom: 12px; }
+.field input[type="text"]:focus { border-color: var(--accent); }
+
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { background: var(--bg); color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody td { padding: 13px 16px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg); }
+
+.pill { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.pill-green { background: #dcfce7; color: #166534; }
+.pill-red   { background: #fee2e2; color: #991b1b; }
+
+/* MATERIALS */
+.material-list { display: flex; flex-direction: column; gap: 10px; }
+.material-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; transition: box-shadow .15s; }
+.material-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.material-icon { font-size: 24px; flex-shrink: 0; }
+.material-info { flex: 1; }
+.material-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.material-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.material-dl { padding: 7px 14px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-block; }
+
+/* GALLERY */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.gallery-item { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: transform .2s, box-shadow .2s; }
+.gallery-item:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.gallery-item img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.gallery-item-meta { padding: 10px 12px; font-size: 11px; color: var(--muted); font-weight: 600; }
+
+/* INSIGHTS */
+.insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.insight-card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px; }
+.insight-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 10px; }
+.insight-value { font-size: 28px; font-weight: 800; color: var(--text); }
+.insight-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.progress-bar-bg { height: 6px; background: var(--border); border-radius: 99px; margin-top: 12px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+
+/* TOOLS LEARNT */
+.tools-section { width: 100%; }
+.tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; width: 100%; }
+@media (max-width: 1100px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px)  { .tools-grid { grid-template-columns: 1fr; } }
+.tool-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 22px 22px 20px; transition: box-shadow .2s, transform .2s; width: 100%; box-sizing: border-box; }
+.tool-tile:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.tool-tile-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.tool-logo { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.tool-name { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.tool-category { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-top: 2px; }
+.tool-learnt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+.tool-learnt-list { display: flex; flex-direction: column; gap: 6px; }
+.tool-learnt-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #334155; line-height: 1.45; }
+.tool-learnt-item::before { content: '✓'; color: var(--accent); font-weight: 800; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+.tool-tile .tool-logo.purple { background: #ede9fe; }
+.tool-tile .tool-logo.blue   { background: #dbeafe; }
+.tool-tile .tool-logo.green  { background: #dcfce7; }
+.tool-tile .tool-logo.amber  { background: #fef3c7; }
+.tool-tile .tool-logo.rose   { background: #ffe4e6; }
+.tool-tile .tool-logo.sky    { background: #e0f2fe; }
+.tool-tile .tool-logo.teal   { background: #ccfbf1; }
+.tool-tile .tool-logo.slate  { background: #f1f5f9; }
+
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center; }
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+.lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+/* FILTER BAR */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; }
+.filter-bar input, .filter-bar select { background: var(--surface); border: 1.5px solid var(--border); border-radius: 9px; padding: 8px 12px; font-size: 13px; font-family: inherit; color: var(--text); outline: none; transition: border .15s; height: 36px; }
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+.filter-bar input[type="text"] { min-width: 160px; }
+.filter-bar input[type="date"] { min-width: 140px; }
+.filter-bar select { min-width: 120px; }
+.filter-clear { padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: none; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; height: 36px; transition: all .15s; }
+.filter-clear:hover { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.filter-count { font-size: 12px; color: var(--muted); margin-left: auto; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon">🎒</div>
+      <div>
+        <div class="brand-name">EduPortal</div>
+        <div class="brand-sub">Student Portal</div>
+      </div>
+    </div>
+    <div class="user-card">
+      <div class="user-avatar" id="avatarLetter">S</div>
+      <div>
+        <div class="user-info-name" id="sidebarName">Student</div>
+        <div class="user-info-role">Student</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Learning</div>
+    <button class="nav-item active" onclick="showTab('tests', this)"><span class="nav-icon">📝</span> Take Tests</button>
+    <button class="nav-item" onclick="showTab('submissions', this)"><span class="nav-icon">📤</span> Submissions</button>
+    <button class="nav-item" onclick="showTab('attendance', this)"><span class="nav-icon">📅</span> Attendance</button>
+    <button class="nav-item" onclick="showTab('marks', this)"><span class="nav-icon">📊</span> My Marks</button>
+    <div class="nav-label">Resources</div>
+    <button class="nav-item" onclick="showTab('materials', this)"><span class="nav-icon">📚</span> Materials</button>
+    <button class="nav-item" onclick="showTab('gallery', this)"><span class="nav-icon">🖼️</span> Gallery</button>
+    <div class="nav-label">Insights</div>
+    <button class="nav-item" onclick="showTab('insights', this)"><span class="nav-icon">💡</span> My Insights</button>
+    <button class="nav-item" onclick="showTab('tools', this)"><span class="nav-icon">🛠️</span> Tools Learnt</button>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" onclick="logout()"><span>🚪</span> Logout</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Tests</div>
+    <span class="badge badge-student">Student</span>
+  </div>
+
+  <div class="content">
+
+    <!-- TESTS -->
+    <div class="panel active" id="panel-tests">
+      <div class="stats-grid" id="testStatsRow"></div>
+      <div class="test-grid" id="testsContainer">
+        <div style="color:#94a3b8;padding:30px">Loading tests…</div>
+      </div>
+    </div>
+
+    <!-- SUBMISSIONS -->
+    <div class="panel" id="panel-submissions">
+      <div class="card">
+        <div class="card-title">📤 Upload Submission</div>
+        <div class="field">
+          <label>Title</label>
+          <input type="text" id="submissionTitle" placeholder="Assignment title…"/>
+        </div>
+        <label class="upload-zone" for="submissionFile">
+          <div style="font-size:32px;margin-bottom:8px">📎</div>
+          <div style="font-size:14px;font-weight:600;color:#475569">Click to select a file</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:4px" id="fileNameLabel">No file chosen</div>
+          <input type="file" id="submissionFile" style="display:none" onchange="document.getElementById('fileNameLabel').textContent=this.files[0]?.name||'No file chosen'"/>
+        </label>
+        <button class="btn btn-primary" onclick="uploadSubmission()">Upload →</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 My Submissions</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>File</th><th>Date</th></tr></thead>
+            <tbody id="submissionList"><tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="panel" id="panel-attendance">
+      <div class="card">
+        <div class="card-title">📅 My Attendance</div>
+        <div class="filter-bar">
+          <input type="date" id="attDateFrom" onchange="applyAttendanceFilter()"/>
+          <span style="font-size:13px;color:var(--muted);font-weight:600">to</span>
+          <input type="date" id="attDateTo" onchange="applyAttendanceFilter()"/>
+          <select id="attStatusFilter" onchange="applyAttendanceFilter()">
+            <option value="">All Status</option>
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+          </select>
+          <button class="filter-clear" onclick="clearAttendanceFilter()">✕ Clear</button>
+          <span class="filter-count" id="attFilterCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Status</th></tr></thead>
+            <tbody id="attendanceList"><tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKS -->
+    <div class="panel" id="panel-marks">
+      <div class="card">
+        <div class="card-title">📊 My Marks</div>
+        <div class="filter-bar">
+          <input type="date" id="marksDateFrom" onchange="applyMarksFilter()"/>
+          <span style="font-size:13px;color:var(--muted);font-weight:600">to</span>
+          <input type="date" id="marksDateTo" onchange="applyMarksFilter()"/>
+          <select id="marksSubjectFilter" onchange="applyMarksFilter()">
+            <option value="">All Subjects</option>
+          </select>
+          <select id="marksRangeFilter" onchange="applyMarksFilter()">
+            <option value="">All Marks</option>
+            <option value="80-100">80–100</option>
+            <option value="60-79">60–79</option>
+            <option value="40-59">40–59</option>
+            <option value="0-39">0–39</option>
+          </select>
+          <button class="filter-clear" onclick="clearMarksFilter()">✕ Clear</button>
+          <span class="filter-count" id="marksFilterCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Subject</th><th>Marks</th></tr></thead>
+            <tbody id="marksList"><tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:20px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATERIALS -->
+    <div class="panel" id="panel-materials">
+      <div class="card">
+        <div class="card-title">📚 Study Materials</div>
+        <div class="filter-bar">
+          <input type="text" id="materialSearch" placeholder="🔍 Search by filename…" oninput="applyMaterialsFilter()"/>
+          <input type="date" id="materialDateFrom" onchange="applyMaterialsFilter()"/>
+          <span style="font-size:13px;color:var(--muted);font-weight:600">to</span>
+          <input type="date" id="materialDateTo" onchange="applyMaterialsFilter()"/>
+          <button class="filter-clear" onclick="clearMaterialsFilter()">✕ Clear</button>
+          <span class="filter-count" id="materialFilterCount"></span>
+        </div>
+        <div id="materialsList" class="material-list">
+          <div style="color:#94a3b8;padding:20px 0;text-align:center">Loading materials…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="panel" id="panel-gallery">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🖼️ Class Gallery</div>
+          <span id="galleryCount" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div class="filter-bar">
+          <input type="date" id="galleryDateFrom" onchange="applyGalleryFilter()"/>
+          <span style="font-size:13px;color:var(--muted);font-weight:600">to</span>
+          <input type="date" id="galleryDateTo" onchange="applyGalleryFilter()"/>
+          <button class="filter-clear" onclick="clearGalleryFilter()">✕ Clear</button>
+          <span class="filter-count" id="galleryFilterCount"></span>
+        </div>
+        <div id="galleryGrid" class="gallery-grid">
+          <div style="color:#94a3b8;padding:20px 0;text-align:center">Loading gallery…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="panel" id="panel-insights">
+      <div id="insightsContent">
+        <div style="color:#94a3b8;padding:30px;text-align:center">Loading insights…</div>
+      </div>
+    </div>
+    <!-- TOOLS LEARNT -->
+    <div class="panel" id="panel-tools" style="width:100%">
+      <div class="card" style="margin-bottom:22px;padding:20px 24px;width:100%;box-sizing:border-box">
+        <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px">🛠️ Digital Tools Learnt</div>
+        <div style="font-size:13px;color:var(--muted)">A collection of digital tools explored during the programme — what each tool is and what was learned.</div>
+      </div>
+      <div class="tools-grid" id="toolsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt=""/>
+</div>
+
+<script>
+const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+if (!user.role || user.role !== 'student') window.location.href = '/';
+
+document.getElementById('sidebarName').textContent  = user.name || 'Student';
+document.getElementById('avatarLetter').textContent = (user.name || 'S')[0].toUpperCase();
+
+const tabTitles = {
+  tests: 'Tests', submissions: 'Submissions', attendance: 'Attendance',
+  marks: 'My Marks', materials: 'Study Materials', gallery: 'Gallery', insights: 'My Insights',
+  tools: 'Tools Learnt'
+};
+
+const loaded = {};
+
+function showTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = tabTitles[name];
+  if (!loaded[name]) { loaded[name] = true; lazyLoad(name); }
+}
+
+function lazyLoad(name) {
+  if (name === 'submissions')  loadSubmissions();
+  if (name === 'attendance')   loadAttendance();
+  if (name === 'marks')        loadMarks();
+  if (name === 'materials')    loadMaterials();
+  if (name === 'gallery')      loadGallery();
+  if (name === 'insights')     loadInsights();
+}
+
+function logout() { sessionStorage.clear(); window.location.href = '/'; }
+
+/* TESTS */
+async function loadTests() {
+  const res   = await fetch(`/api/tests/${user.username}`);
+  const tests = await res.json();
+  const completed = tests.filter(t => t.completed).length;
+  const pending   = tests.length - completed;
+  document.getElementById('testStatsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-icon purple">📝</div><div><div class="stat-value">${tests.length}</div><div class="stat-label">Total Tests</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">${completed}</div><div class="stat-label">Completed</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-value">${pending}</div><div class="stat-label">Pending</div></div></div>`;
+  let html = '';
+  tests.forEach(t => {
+    html += `<div class="test-card">
+      <div class="test-card-icon">📋</div>
+      <h3>${t.title}</h3>
+      <p>Multiple Choice Questions</p>
+      ${t.completed
+        ? `<button class="btn btn-disabled" disabled>✓ Completed</button>`
+        : `<button class="btn btn-primary" onclick="startTest('${t.id}')">Take Test →</button>`}
+    </div>`;
+  });
+  document.getElementById('testsContainer').innerHTML = html || '<div style="color:#94a3b8">No tests available.</div>';
+}
+function startTest(id) { window.location.href = `/test.html?test=${id}`; }
+
+/* SUBMISSIONS */
+async function uploadSubmission() {
+  const file  = document.getElementById('submissionFile').files[0];
+  const title = document.getElementById('submissionTitle').value.trim();
+  if (!file) { alert('Please select a file'); return; }
+  const fd = new FormData();
+  fd.append('student', user.username);
+  fd.append('title', title);
+  fd.append('file', file);
+  const res  = await fetch('/api/upload-submission', { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!data.success) { alert(data.error); return; }
+  alert('Upload successful!');
+  loadSubmissions();
+}
+async function loadSubmissions() {
+  const res  = await fetch(`/api/student-submissions/${user.username}`);
+  const data = await res.json();
+  let html = '';
+  data.forEach(x => { html += `<tr><td>📄 ${x.file}</td><td style="color:#64748b">${x.date}</td></tr>`; });
+  document.getElementById('submissionList').innerHTML = html || '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">No submissions yet.</td></tr>';
+}
+
+/* ATTENDANCE */
+let allAttendanceData = {};
+
+async function loadAttendance() {
+  const res  = await fetch(`/api/student-attendance/${user.username}`);
+  allAttendanceData = await res.json();
+  renderAttendance(allAttendanceData);
+}
+
+function applyAttendanceFilter() {
+  const from   = document.getElementById('attDateFrom').value;
+  const to     = document.getElementById('attDateTo').value;
+  const status = document.getElementById('attStatusFilter').value;
+  let filtered = {};
+  for (let date in allAttendanceData) {
+    if (from && date < from) continue;
+    if (to   && date > to)   continue;
+    if (status && allAttendanceData[date] !== status) continue;
+    filtered[date] = allAttendanceData[date];
+  }
+  const total = Object.keys(allAttendanceData).length;
+  const shown = Object.keys(filtered).length;
+  document.getElementById('attFilterCount').textContent = `${shown} of ${total} shown`;
+  renderAttendance(filtered);
+}
+
+function clearAttendanceFilter() {
+  document.getElementById('attDateFrom').value = '';
+  document.getElementById('attDateTo').value   = '';
+  document.getElementById('attStatusFilter').value = '';
+  document.getElementById('attFilterCount').textContent = '';
+  renderAttendance(allAttendanceData);
+}
+
+function renderAttendance(data) {
+  let html = '';
+  for (let date in data) {
+    const s = data[date];
+    html += `<tr><td>${date}</td><td><span class="pill ${s === 'Present' ? 'pill-green' : 'pill-red'}">${s}</span></td></tr>`;
+  }
+  document.getElementById('attendanceList').innerHTML = html || '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:20px">No attendance records match the filter.</td></tr>';
+}
+
+/* MARKS */
+let allMarksData = {};
+
+async function loadMarks() {
+  const res  = await fetch(`/api/student-marks/${user.username}`);
+  allMarksData = await res.json();
+
+  // Populate subjects dropdown
+  const subjects = new Set();
+  for (let date in allMarksData) for (let subj in allMarksData[date]) subjects.add(subj);
+  const subSel = document.getElementById('marksSubjectFilter');
+  subSel.innerHTML = '<option value="">All Subjects</option>' + [...subjects].sort().map(s => `<option value="${s}">${s}</option>`).join('');
+
+  renderMarks(allMarksData);
+}
+
+function applyMarksFilter() {
+  const from   = document.getElementById('marksDateFrom').value;
+  const to     = document.getElementById('marksDateTo').value;
+  const subj   = document.getElementById('marksSubjectFilter').value;
+  const marksR = document.getElementById('marksRangeFilter').value;
+  let filtered = {};
+  let total = 0, shown = 0;
+  for (let date in allMarksData) {
+    if (from && date < from) continue;
+    if (to   && date > to)   continue;
+    for (let subject in allMarksData[date]) {
+      total++;
+      if (subj && subject !== subj) continue;
+      if (marksR) {
+        const [lo, hi] = marksR.split('-').map(Number);
+        const v = allMarksData[date][subject];
+        if (v < lo || v > hi) continue;
+      }
+      if (!filtered[date]) filtered[date] = {};
+      filtered[date][subject] = allMarksData[date][subject];
+      shown++;
+    }
+  }
+  document.getElementById('marksFilterCount').textContent = `${shown} of ${total} shown`;
+  renderMarks(filtered);
+}
+
+function clearMarksFilter() {
+  document.getElementById('marksDateFrom').value = '';
+  document.getElementById('marksDateTo').value   = '';
+  document.getElementById('marksSubjectFilter').value = '';
+  document.getElementById('marksRangeFilter').value = '';
+  document.getElementById('marksFilterCount').textContent = '';
+  renderMarks(allMarksData);
+}
+
+function renderMarks(data) {
+  let html = '';
+  for (let date in data) {
+    for (let subject in data[date]) {
+      html += `<tr><td style="color:#64748b">${date}</td><td style="font-weight:600">${subject}</td><td><span style="font-weight:800;color:#6366f1">${data[date][subject]}</span></td></tr>`;
+    }
+  }
+  document.getElementById('marksList').innerHTML = html || '<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:20px">No marks match the filter.</td></tr>';
+}
+
+/* MATERIALS */
+let allMaterialsData = [];
+
+async function loadMaterials() {
+  try {
+    const res  = await fetch('/api/materials');
+    allMaterialsData = await res.json();
+    if (!allMaterialsData.length) {
+      document.getElementById('materialsList').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No materials uploaded yet.</div>';
+      return;
+    }
+    renderMaterials(allMaterialsData);
+  } catch(e) {
+    document.getElementById('materialsList').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">Could not load materials.</div>';
+  }
+}
+
+function applyMaterialsFilter() {
+  const search = document.getElementById('materialSearch').value.trim().toLowerCase();
+  const from   = document.getElementById('materialDateFrom').value;
+  const to     = document.getElementById('materialDateTo').value;
+  let filtered = allMaterialsData.filter(m => {
+    if (search && !m.filename.toLowerCase().includes(search)) return false;
+    if (from   && m.date < from) return false;
+    if (to     && m.date > to)   return false;
+    return true;
+  });
+  document.getElementById('materialFilterCount').textContent = `${filtered.length} of ${allMaterialsData.length} shown`;
+  renderMaterials(filtered);
+}
+
+function clearMaterialsFilter() {
+  document.getElementById('materialSearch').value = '';
+  document.getElementById('materialDateFrom').value = '';
+  document.getElementById('materialDateTo').value   = '';
+  document.getElementById('materialFilterCount').textContent = '';
+  renderMaterials(allMaterialsData);
+}
+
+function renderMaterials(data) {
+  if (!data.length) {
+    document.getElementById('materialsList').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No materials match the filter.</div>';
+    return;
+  }
+  const icons = { pdf: '📄', doc: '📝', docx: '📝', ppt: '📊', pptx: '📊', xls: '📊', xlsx: '📊', jpg: '🖼️', jpeg: '🖼️', png: '🖼️', mp4: '🎬', mp3: '🎵' };
+  let html = '';
+  data.forEach(m => {
+    const ext  = m.filename.split('.').pop().toLowerCase();
+    const icon = icons[ext] || '📎';
+    const size = m.size > 1024 * 1024 ? (m.size / 1024 / 1024).toFixed(1) + ' MB' : (m.size / 1024).toFixed(0) + ' KB';
+    html += `<div class="material-item">
+      <div class="material-icon">${icon}</div>
+      <div class="material-info">
+        <div class="material-name">${m.filename}</div>
+        <div class="material-meta">${size} · Uploaded ${m.date}</div>
+      </div>
+      <a class="material-dl" href="${m.url}" download="${m.filename}" target="_blank">⬇ Download</a>
+    </div>`;
+  });
+  document.getElementById('materialsList').innerHTML = html;
+}
+
+/* GALLERY */
+let allGalleryData = [];
+
+async function loadGallery() {
+  try {
+    const res  = await fetch('/api/gallery');
+    allGalleryData = await res.json();
+    if (!allGalleryData.length) {
+      document.getElementById('galleryGrid').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No photos yet.</div>';
+      return;
+    }
+    renderGallery(allGalleryData);
+  } catch(e) {
+    document.getElementById('galleryGrid').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">Could not load gallery.</div>';
+  }
+}
+
+function applyGalleryFilter() {
+  const from = document.getElementById('galleryDateFrom').value;
+  const to   = document.getElementById('galleryDateTo').value;
+  let filtered = allGalleryData.filter(g => {
+    if (from && g.date < from) return false;
+    if (to   && g.date > to)   return false;
+    return true;
+  });
+  document.getElementById('galleryFilterCount').textContent = `${filtered.length} of ${allGalleryData.length} shown`;
+  renderGallery(filtered);
+}
+
+function clearGalleryFilter() {
+  document.getElementById('galleryDateFrom').value = '';
+  document.getElementById('galleryDateTo').value   = '';
+  document.getElementById('galleryFilterCount').textContent = '';
+  renderGallery(allGalleryData);
+}
+
+function renderGallery(data) {
+  document.getElementById('galleryCount').textContent = `${data.length} photo${data.length !== 1 ? 's' : ''}`;
+  if (!data.length) {
+    document.getElementById('galleryGrid').innerHTML = '<div style="color:#94a3b8;padding:20px 0;text-align:center">No photos match the selected dates.</div>';
+    return;
+  }
+  let html = '';
+  data.forEach(g => {
+    html += `<div class="gallery-item" onclick="openLightbox('${g.url}')">
+      <img src="${g.url}" alt="${g.file}" loading="lazy" onerror="this.parentElement.style.display='none'"/>
+      <div class="gallery-item-meta">📅 ${g.date}</div>
+    </div>`;
+  });
+  document.getElementById('galleryGrid').innerHTML = html;
+}
+
+function openLightbox(url) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+/* INSIGHTS */
+async function loadInsights() {
+  try {
+    const [attRes, marksRes, testsRes] = await Promise.all([
+      fetch(`/api/student-attendance/${user.username}`),
+      fetch(`/api/student-marks/${user.username}`),
+      fetch(`/api/tests/${user.username}`)
+    ]);
+    const attendance = await attRes.json();
+    const marks      = await marksRes.json();
+    const tests      = await testsRes.json();
+
+    // Attendance %
+    const attDays    = Object.values(attendance);
+    const attPct     = attDays.length ? Math.round((attDays.filter(v => v === 'Present').length / attDays.length) * 100) : null;
+    const attColor   = attPct === null ? '#94a3b8' : attPct >= 75 ? '#10b981' : attPct >= 50 ? '#f59e0b' : '#ef4444';
+
+    // Avg marks
+    const allMarks = Object.values(marks).flatMap(d => Object.values(d));
+    const avgMarks = allMarks.length ? (allMarks.reduce((a, b) => a + b, 0) / allMarks.length).toFixed(1) : null;
+    const marksColor = avgMarks === null ? '#94a3b8' : avgMarks >= 70 ? '#10b981' : avgMarks >= 50 ? '#f59e0b' : '#ef4444';
+
+    // Tests
+    const completed = tests.filter(t => t.completed).length;
+    const testPct   = tests.length ? Math.round((completed / tests.length) * 100) : 0;
+
+    // Insights text
+    const tips = [];
+    if (attPct !== null && attPct < 75) tips.push('⚠️ Your attendance is below 75%. Try to attend more classes regularly.');
+    if (avgMarks !== null && avgMarks < 50) tips.push('📖 Your average marks are low. Consider reviewing your materials more thoroughly.');
+    if (tests.length > 0 && completed === 0) tips.push('📝 You haven\'t completed any tests yet. Start with the first available test!');
+    if (attPct !== null && attPct >= 90) tips.push('🌟 Excellent attendance! Keep it up.');
+    if (avgMarks !== null && avgMarks >= 80) tips.push('🏆 Outstanding marks! You\'re performing really well.');
+    if (completed === tests.length && tests.length > 0) tips.push('✅ You\'ve completed all available tests. Great dedication!');
+    if (!tips.length) tips.push('📊 Keep attending classes and taking tests to see personalized insights here.');
+
+    document.getElementById('insightsContent').innerHTML = `
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-title">Attendance Rate</div>
+          <div class="insight-value" style="color:${attColor}">${attPct !== null ? attPct + '%' : '—'}</div>
+          <div class="insight-sub">${attDays.length} day(s) recorded · ${attDays.filter(v=>v==='Present').length} present</div>
+          ${attPct !== null ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${attPct}%;background:${attColor}"></div></div>` : ''}
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">Average Marks</div>
+          <div class="insight-value" style="color:${marksColor}">${avgMarks !== null ? avgMarks : '—'}</div>
+          <div class="insight-sub">${allMarks.length} assessment(s) recorded</div>
+          ${avgMarks !== null ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(avgMarks,100)}%;background:${marksColor}"></div></div>` : ''}
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">Tests Completed</div>
+          <div class="insight-value">${completed} / ${tests.length}</div>
+          <div class="insight-sub">${testPct}% completion rate</div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${testPct}%;background:#6366f1"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">💡 Personalized Tips</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${tips.map(t => `<div style="padding:12px 16px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-size:13px;color:var(--text)">${t}</div>`).join('')}
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('insightsContent').innerHTML = '<div style="color:#94a3b8;padding:30px;text-align:center">Could not load insights.</div>';
+  }
+}
+
+/* TOOLS LEARNT */
+async function renderTools() {
+  const grid = document.getElementById('toolsGrid');
+  grid.innerHTML = '<div style="color:#94a3b8;padding:30px;text-align:center">Loading tools…</div>';
+  try {
+    const res   = await fetch('/api/tools');
+    const tools = await res.json();
+    grid.innerHTML = tools.map(t => `
+      <div class="tool-tile">
+        <div class="tool-tile-top">
+          <div class="tool-logo ${t.color}">${t.icon}</div>
+          <div>
+            <div class="tool-name">${t.name}</div>
+            <div class="tool-category">${t.category}</div>
+          </div>
+        </div>
+        <div class="tool-learnt-label">What was learnt</div>
+        <div class="tool-learnt-list">
+          ${t.learnt.map(l => `<div class="tool-learnt-item">${l}</div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    grid.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center">Could not load tools.</div>';
+  }
+}
+
+loadTests();
+loaded['tests'] = true;
+renderTools();
+loaded['tools'] = true;
+</script>
+</body>
+</html>
