@@ -323,19 +323,30 @@ async def upload_submission(
 @app.get("/api/student-submissions/{student}")
 def student_submissions(student: str):
     base = os.path.join(
-    STORAGE_DIR,
-    "students",
-    student,
-    "submissions"
-)
+        STORAGE_DIR,
+        "students",
+        student,
+        "submissions"
+    )
     result = []
-
-    if os.path.exists(base):
-        for date in os.listdir(base):
-            date_folder = os.path.join(base, date)
+    if not os.path.exists(base):
+        return []
+    for date in os.listdir(base):
+        date_folder = os.path.join(
+            base,
+            date
+        )
+        if not os.path.isdir(date_folder):
+            continue
+        try:
             for file in os.listdir(date_folder):
-                result.append({"date": date, "file": file})
 
+                result.append({
+                    "date": date,
+                    "file": file
+                })
+        except:
+            continue
     return result
 
 
@@ -924,38 +935,35 @@ async def upload_gallery(
 
 @app.get("/api/gallery")
 def gallery():
-
-    result=[]
-
-    base=os.path.join(
-    STORAGE_DIR,
-    "gallery"
-)
+    result = []
+    base = os.path.join(
+        STORAGE_DIR,
+        "gallery"
+    )
 
     if not os.path.exists(base):
-
         return []
-
     for date in os.listdir(base):
-
-        date_folder=os.path.join(
+        date_folder = os.path.join(
             base,
             date
         )
+        if not os.path.isdir(date_folder):
+            continue
+        try:
 
-        for file in os.listdir(date_folder):
+            for file in os.listdir(date_folder):
 
-            result.append({
+                result.append({
 
-                "date":date,
+                    "date": date,
+                    "file": file,
 
-                "file":file,
-
-                "url":
-
-                f"/storage/gallery/{date}/{file}"
-
-            })
+                    "url":
+                    f"/storage/gallery/{date}/{file}"
+                })
+        except:
+            continue
 
     return result
 # ─────────────────────────────────────────────
