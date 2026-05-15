@@ -494,15 +494,18 @@ def get_marks(student: str):
 
 @app.get("/api/school-analytics")
 def school_analytics():
+
     base = os.path.join(
-    STORAGE_DIR,
-    "students"
-)
+        STORAGE_DIR,
+        "students"
+    )
 
     if not os.path.exists(base):
-        return {}
+        return {
+            "summary": {},
+            "students": []
+        }
 
-    students = os.listdir(base)
     result = []
 
     total_tests = 0
@@ -512,93 +515,202 @@ def school_analytics():
     marks_total = 0
     marks_count = 0
 
-    for student in students:
-        student_path = os.path.join(base, student)
+    for student in STUDENT_USERS.keys():
+
+        student_path = os.path.join(
+            base,
+            student
+        )
+
         student_data = {
             "student": student,
+            "subject":
+            STUDENT_USERS[student].get(
+                "subject",
+                "-"
+            ),
             "tests": 0,
             "submissions": 0,
             "attendance": "-",
-            "marks": "-",
+            "marks": "-"
         }
 
-        # Tests
-        test_path = os.path.join(student_path, "tests")
-        if os.path.exists(test_path):
-            tests = len(os.listdir(test_path))
+        # TESTS
+        try:
+            completed = TEST_SUBMISSIONS.get(
+                student,
+                {}
+            )
+
+            tests = len(completed)
+
             student_data["tests"] = tests
+
             total_tests += tests
 
-        # Submissions
-        sub_path = os.path.join(student_path, "submissions")
-        if os.path.exists(sub_path):
-            count = sum(
-                len(os.listdir(os.path.join(sub_path, d)))
-                for d in os.listdir(sub_path)
+        except:
+            pass
+
+        # SUBMISSIONS
+        try:
+
+            sub_path = os.path.join(
+                student_path,
+                "submissions"
             )
-            student_data["submissions"] = count
+
+            count = 0
+
+            if os.path.exists(sub_path):
+
+                for d in os.listdir(sub_path):
+
+                    date_folder = os.path.join(
+                        sub_path,
+                        d
+                    )
+
+                    if os.path.isdir(date_folder):
+
+                        count += len([
+                            f for f in os.listdir(date_folder)
+                            if not f.startswith(".")
+                        ])
+
+            student_data[
+                "submissions"
+            ] = count
+
             total_submissions += count
 
-        # Attendance
-        att_file = os.path.join(
-            student_path,
-            "attendance",
-            "attendance.json"
-        )
-        if os.path.exists(att_file):
-            with open(att_file) as f:
-                attendance = json.load(f)
-            if attendance:
-                latest = list(
-                    attendance.values()
-                )[-1]
-                student_data[
-                    "attendance"
-                ] = latest
-                attendance_count += 1
-                if latest == "Present":
-                    attendance_present += 1
+        except:
+            pass
 
-        # Marks
-        marks_file = os.path.join(student_path, "marks", "marks.json")
-        if os.path.exists(marks_file):
-            with open(marks_file) as f:
-                marks = json.load(f)
-            values = []
-            for d in marks.values():
-                for v in d.values():
-                    try:
-                        values.append(float(v))
-                    except:
-                        pass
-            if values:
-                student_data["marks"] = round(
-                    sum(values) / len(values),
-                    1)
+        # ATTENDANCE
+        try:
 
-                marks_total += sum(values)
-                marks_count += len(values)
+            att_file = os.path.join(
+                student_path,
+                "attendance",
+                "attendance.json"
+            )
+
+            if os.path.exists(att_file):
+
+                with open(att_file) as f:
+
+                    attendance = json.load(f)
+
+                if attendance:
+
+                    latest = list(
+                        attendance.values()
+                    )[-1]
+
+                    student_data[
+                        "attendance"
+                    ] = latest
+
+                    attendance_count += 1
+
+                    if latest == "Present":
+
+                        attendance_present += 1
+
+        except:
+            pass
+
+        # MARKS
+        try:
+
+            marks_file = os.path.join(
+                student_path,
+                "marks",
+                "marks.json"
+            )
+
+            if os.path.exists(marks_file):
+
+                with open(marks_file) as f:
+
+                    marks = json.load(f)
+
+                values = []
+
+                for d in marks.values():
+
+                    if isinstance(d, dict):
+
+                        for v in d.values():
+
+                            try:
+                                values.append(
+                                    float(v)
+                                )
+                            except:
+                                pass
+
+                if values:
+
+                    avg = round(
+                        sum(values)
+                        / len(values),
+                        1
+                    )
+
+                    student_data[
+                        "marks"
+                    ] = avg
+
+                    marks_total += sum(values)
+
+                    marks_count += len(values)
+
+        except:
+            pass
+
         result.append(student_data)
 
-    overall_attendance = (
-        round((attendance_present / attendance_count) * 100, 1)
-        if attendance_count else 0
-    )
+    overall_attendance = 0
 
-    avg_marks = (
-        round(marks_total / marks_count, 1)
-        if marks_count else 0
-    )
+    if attendance_count > 0:
+
+        overall_attendance = round(
+            attendance_present
+            / attendance_count * 100,
+            1
+        )
+
+    avg_marks = 0
+
+    if marks_count > 0:
+
+        avg_marks = round(
+            marks_total / marks_count,
+            1
+        )
 
     return {
+
         "summary": {
-            "students": len(students),
-            "tests": total_tests,
-            "submissions": total_submissions,
-            "attendance": overall_attendance,
-            "marks": avg_marks,
+            "students":
+            len(STUDENT_USERS),
+
+            "tests":
+            total_tests,
+
+            "submissions":
+            total_submissions,
+
+            "attendance":
+            overall_attendance,
+
+            "marks":
+            avg_marks
         },
-        "students": result,
+
+        "students":
+        result
     }
 
 @app.get("/api/student-report")
