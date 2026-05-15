@@ -90,7 +90,6 @@ STUDENT_USERS = {
     "prabavathy":      {"password": "prabavathy2026",      "role": "student", "name": "Prabavathy S", "subject":"Business Studies"},
 }
 
-
 # ─────────────────────────────────────────────
 # MODELS
 # ─────────────────────────────────────────────
