@@ -300,7 +300,13 @@ async def upload_submission(
 ):
     try:
         date = str(datetime.now().date())
-        folder = f"storage/students/{student}/submissions/{date}"
+        folder = os.path.join(
+            STORAGE_DIR,
+            "students",
+            student,
+            "submissions",
+            date
+        )
         
 
         filename = f"{title}_{file.filename}"
@@ -890,4 +896,9 @@ app.mount(
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
