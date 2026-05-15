@@ -555,12 +555,20 @@ def school_analytics():
         if os.path.exists(marks_file):
             with open(marks_file) as f:
                 marks = json.load(f)
-            values = [v for d in marks.values() for v in d.values()]
+            values = []
+            for d in marks.values():
+                for v in d.values():
+                    try:
+                        values.append(float(v))
+                    except:
+                        pass
             if values:
-                student_data["marks"] = round(sum(values) / len(values), 1)
+                student_data["marks"] = round(
+                    sum(values) / len(values),
+                    1)
+
                 marks_total += sum(values)
                 marks_count += len(values)
-
         result.append(student_data)
 
     overall_attendance = (
@@ -607,9 +615,15 @@ def student_report():
         if os.path.exists(marks_file):
             with open(marks_file) as f:
                 marks = json.load(f)
-            values = [v for d in marks.values() for v in d.values()]
+            values = []
+            for d in marks.values():
+                for v in d.values():
+                    try:
+                        values.append(float(v))
+                    except:
+                        pass
             if values:
-                row["avg_marks"] = round(sum(values) / len(values), 1)
+                row["avg_marks"] = round(sum(values) / len(values),1)
         # Attendance
         att_file = os.path.join(
     STORAGE_DIR,
