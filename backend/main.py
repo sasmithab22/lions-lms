@@ -5,8 +5,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-from test_data import TESTS
-from storage.tests.answers import TEST_SUBMISSIONS
+from backend.test_data import TESTS
+from backend.storage.tests.answers import TEST_SUBMISSIONS
 import uvicorn
 import shutil
 import json
@@ -346,7 +346,10 @@ def student_submissions(student: str):
 @app.get("/api/all-submissions")
 def all_submissions():
     result = []
-    base = "storage/students"
+    base = os.path.join(
+    STORAGE_DIR,
+    "students"
+)
 
     if not os.path.exists(base):
         return []
@@ -454,7 +457,10 @@ def get_marks(student: str):
 
 @app.get("/api/school-analytics")
 def school_analytics():
-    base = "storage/students"
+    base = os.path.join(
+    STORAGE_DIR,
+    "students"
+)
 
     if not os.path.exists(base):
         return {}
@@ -757,7 +763,7 @@ def get_tools():
     return TOOLS_LIST
 
 
-
+@app.post("/api/upload-material")
 async def upload_material(file: UploadFile = File(...)):
     folder = "storage/materials"
     os.makedirs(folder, exist_ok=True)
@@ -895,16 +901,6 @@ app.mount(
     name="storage",
 )
 
-FRONTEND_DIR = os.path.join(
-    BASE_DIR,
-    "../frontend"
-)
-
-app.mount(
-    "/",
-    StaticFiles(directory=FRONTEND_DIR, html=True),
-    name="static",
-)
 
 # ─────────────────────────────────────────────
 
