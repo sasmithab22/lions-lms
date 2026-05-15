@@ -26,7 +26,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-RESULTS_FILE = "storage/tests/results.json"
+BASE_DIR = os.path.dirname(__file__)
+
+STORAGE_DIR = os.path.join(
+    BASE_DIR,
+    "storage"
+)
+
+RESULTS_FILE = os.path.join(
+    STORAGE_DIR,
+    "tests",
+    "results.json"
+)
 
 # ─────────────────────────────────────────────
 # USER STORES
@@ -880,13 +891,18 @@ def gallery():
 
 app.mount(
     "/storage",
-    StaticFiles(directory="storage"),
+    StaticFiles(directory=STORAGE_DIR),
     name="storage",
+)
+
+FRONTEND_DIR = os.path.join(
+    BASE_DIR,
+    "../frontend"
 )
 
 app.mount(
     "/",
-    StaticFiles(directory="../frontend", html=True),
+    StaticFiles(directory=FRONTEND_DIR, html=True),
     name="static",
 )
 
