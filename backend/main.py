@@ -322,7 +322,12 @@ async def upload_submission(
 
 @app.get("/api/student-submissions/{student}")
 def student_submissions(student: str):
-    base = f"storage/students/{student}/submissions"
+    base = os.path.join(
+    STORAGE_DIR,
+    "students",
+    student,
+    "submissions"
+)
     result = []
 
     if os.path.exists(base):
@@ -365,7 +370,14 @@ def all_submissions():
 
 @app.get("/api/download-submission/{student}/{date}/{filename}")
 def download_submission(student: str, date: str, filename: str):
-    path = f"storage/students/{student}/submissions/{date}/{filename}"
+    path = os.path.join(
+    STORAGE_DIR,
+    "students",
+    student,
+    "submissions",
+    date,
+    filename
+)
     return FileResponse(path=path, filename=filename)
 
 # ─────────────────────────────────────────────
@@ -378,7 +390,13 @@ def save_attendance(data: dict):
     date = data["date"]
     status = data["status"]
 
-    file = f"storage/students/{student}/attendance/attendance.json"
+    file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    student,
+    "attendance",
+    "attendance.json"
+)
     attendance = {}
 
     if os.path.exists(file):
@@ -395,7 +413,13 @@ def save_attendance(data: dict):
 
 @app.get("/api/student-attendance/{student}")
 def get_attendance(student: str):
-    file = f"storage/students/{student}/attendance/attendance.json"
+    file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    student,
+    "attendance",
+    "attendance.json"
+)
 
     if os.path.exists(file):
         with open(file, "r") as f:
@@ -414,7 +438,13 @@ def save_marks(data: dict):
     subject = data["subject"]
     mark = data["mark"]
 
-    file = f"storage/students/{student}/marks/marks.json"
+    file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    student,
+    "marks",
+    "marks.json"
+)
     marks = {}
 
     if os.path.exists(file):
@@ -434,7 +464,13 @@ def save_marks(data: dict):
 
 @app.get("/api/student-marks/{student}")
 def get_marks(student: str):
-    file = f"storage/students/{student}/marks/marks.json"
+    file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    student,
+    "marks",
+    "marks.json"
+)
 
     if os.path.exists(file):
         with open(file, "r") as f:
@@ -551,7 +587,13 @@ def student_report():
             "tests_completed": 0,
         }
         # Marks
-        marks_file = f"storage/students/{username}/marks/marks.json"
+        marks_file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    username,
+    "marks",
+    "marks.json"
+)
         if os.path.exists(marks_file):
             with open(marks_file) as f:
                 marks = json.load(f)
@@ -559,7 +601,13 @@ def student_report():
             if values:
                 row["avg_marks"] = round(sum(values) / len(values), 1)
         # Attendance
-        att_file = f"storage/students/{username}/attendance/attendance.json"
+        att_file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    username,
+    "attendance",
+    "attendance.json"
+)
         if os.path.exists(att_file):
             with open(att_file) as f:
                 att = json.load(f)
@@ -590,9 +638,13 @@ def date_report(date:str):
 
         # ATTENDANCE
 
-        attendance_file=f"""
-storage/students/{username}/attendance/attendance.json
-""".replace("\n","")
+        attendance_file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    username,
+    "attendance",
+    "attendance.json"
+)
 
         if os.path.exists(attendance_file):
 
@@ -607,9 +659,13 @@ storage/students/{username}/attendance/attendance.json
 
         # MARKS
 
-        marks_file=f"""
-storage/students/{username}/marks/marks.json
-""".replace("\n","")
+        marks_file = os.path.join(
+    STORAGE_DIR,
+    "students",
+    username,
+    "marks",
+    "marks.json"
+)
 
         if os.path.exists(marks_file):
 
@@ -756,7 +812,10 @@ def get_tools():
 
 @app.post("/api/upload-material")
 async def upload_material(file: UploadFile = File(...)):
-    folder = "storage/materials"
+    folder = os.path.join(
+    STORAGE_DIR,
+    "materials"
+)
     
     filepath = os.path.join(folder, file.filename)
     with open(filepath, "wb") as buffer:
@@ -765,7 +824,10 @@ async def upload_material(file: UploadFile = File(...)):
 
 @app.get("/api/materials")
 def get_materials():
-    folder = "storage/materials"
+    folder = os.path.join(
+    STORAGE_DIR,
+    "materials"
+)
     if not os.path.exists(folder):
         return []
     result = []
@@ -779,7 +841,10 @@ def get_materials():
 
 @app.get("/api/reports")
 def get_reports():
-    base = "storage/reports"
+    base = os.path.join(
+    STORAGE_DIR,
+    "reports"
+)
     if not os.path.exists(base):
         return []
     result = []
@@ -800,7 +865,11 @@ async def upload_report(
 
     date=str(datetime.now().date())
 
-    folder=f"storage/reports/{date}"
+    folder = os.path.join(
+    STORAGE_DIR,
+    "reports",
+    date
+)
 
     
 
@@ -829,7 +898,11 @@ async def upload_gallery(
 
     date=str(datetime.now().date())
 
-    folder=f"storage/gallery/{date}"
+    folder = os.path.join(
+    STORAGE_DIR,
+    "gallery",
+    date
+)
 
     
 
@@ -854,7 +927,10 @@ def gallery():
 
     result=[]
 
-    base="storage/gallery"
+    base=os.path.join(
+    STORAGE_DIR,
+    "gallery"
+)
 
     if not os.path.exists(base):
 
