@@ -540,15 +540,24 @@ def school_analytics():
             total_submissions += count
 
         # Attendance
-        att_file = os.path.join(student_path, "attendance", "attendance.json")
+        att_file = os.path.join(
+            student_path,
+            "attendance",
+            "attendance.json"
+        )
         if os.path.exists(att_file):
             with open(att_file) as f:
                 attendance = json.load(f)
-            latest = list(attendance.values())[-1]
-            student_data["attendance"] = latest
-            attendance_count += 1
-            if latest == "Present":
-                attendance_present += 1
+            if attendance:
+                latest = list(
+                    attendance.values()
+                )[-1]
+                student_data[
+                    "attendance"
+                ] = latest
+                attendance_count += 1
+                if latest == "Present":
+                    attendance_present += 1
 
         # Marks
         marks_file = os.path.join(student_path, "marks", "marks.json")
@@ -636,8 +645,15 @@ def student_report():
             with open(att_file) as f:
                 att = json.load(f)
             days = list(att.values())
-            if days:
-                row["attendance_pct"] = round(len([d for d in days if d == "Present"]) / len(days) * 100, 1)
+            if len(days) > 0:
+                present = len([
+                    d for d in days
+                    if d == "Present"
+                ])
+                row["attendance_pct"] = round(
+                    present / len(days) * 100,
+                    1
+                )
         # Tests
         completed = TEST_SUBMISSIONS.get(username, {})
         row["tests_completed"] = len(completed)
