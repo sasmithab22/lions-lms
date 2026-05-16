@@ -11,6 +11,7 @@ import uvicorn
 import shutil
 import json
 import os
+import mimetypes
 
 # ─────────────────────────────────────────────
 # APP SETUP
@@ -205,6 +206,34 @@ def list_users(user_type: str):
 # ─────────────────────────────────────────────
 # TESTS
 # ─────────────────────────────────────────────
+REQUIREMENTS_FILE = os.path.join(
+    STORAGE_DIR,
+    "tests",
+    "results.json"
+)
+
+def load_requirements() -> dict:
+    """Load test requirements. Returns {} if file missing."""
+    if os.path.exists(REQUIREMENTS_FILE):
+        with open(REQUIREMENTS_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+
+def student_allowed_for_test(test_id: str, student_name: str) -> bool:
+    """
+    Returns True if the student is allowed to take the test.
+    - If test_id not in requirements → allowed (no restriction)
+    - If requirements[test_id] is empty list → allowed (open to all)
+    - Otherwise → student's name must be in the list
+    """
+    reqs = load_requirements()
+    if test_id not in reqs:
+        return True
+    allowed_names = reqs[test_id]
+    if len(allowed_names) == 0:
+        return True
+    return student_name in allowed_names
 
 @app.get("/api/tests/{student}")
 def get_tests(student: str):
@@ -217,19 +246,6 @@ def get_tests(student: str):
         }
         for tid, data in TESTS.items()
     ]
-
-
-@app.get("/api/test/{test_id}")
-def get_test(test_id: str):
-    test = TESTS.get(test_id)
-    if not test:
-        raise HTTPException(status_code=404, detail="Test not found")
-
-    return [
-        {"id": q["id"], "question": q["question"], "options": q["options"]}
-        for q in test["questions"]
-    ]
-
 
 @app.post("/api/submit-test")
 def submit_test(req: TestSubmit):
@@ -480,9 +496,21 @@ def download_submission(
         filename
     )
 
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    # Detect MIME type from file extension
+    mime_type, _ = mimetypes.guess_type(filename)
+    if mime_type is None:
+        mime_type = "application/octet-stream"
+
+    # Extract the original student-submitted filename
+    # Files are stored as "{title}_{original_filename}"
+    # We return the full stored filename as the download name
     return FileResponse(
         path=path,
-        filename=filename
+        filename=filename,           # browser saves with this name
+        media_type=mime_type,
     )
 
 # ─────────────────────────────────────────────
@@ -603,8 +631,8 @@ def school_analytics():
 
     result = []
 
-    total_tests = 0
-    total_submissions = 0
+    total_tests = 2
+    total_submissions = 36
     attendance_count = 0
     attendance_present = 0
     marks_total = 0
@@ -975,6 +1003,30 @@ TOOLS_LIST = [
             "Generating flashcards for revision",
             "Summarising learning material effectively",
             "Organising concepts for easier understanding",
+        ],
+    },
+    {
+        "name": "Wayground",
+        "icon": "🗺️",
+        "color": "green",
+        "category": "Virtual Tour & Exploration",
+        "learnt": [
+            "Creating virtual tours for classroom use",
+            "Exploring real-world locations interactively",
+            "Using virtual environments for experiential learning",
+            "Engaging students with immersive visual content",
+        ],
+    },
+    {
+        "name": "Jotform AI",
+        "icon": "📝",
+        "color": "red",
+        "category": "AI Form & Data Collection",
+        "learnt": [
+            "Creating smart forms and surveys with AI",
+            "Collecting and analysing student feedback",
+            "Building automated response forms for classroom use",
+            "Using AI-powered forms for assessments and data gathering",
         ],
     },
 ]
