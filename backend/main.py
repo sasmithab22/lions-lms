@@ -242,7 +242,8 @@ def get_tests(student: str):
         {
             "id": tid,
             "title": data["title"],
-            "completed": tid in completed,
+            "completed": True,   # always show as completed
+            "allowed": False,    # always disabled
         }
         for tid, data in TESTS.items()
     ]

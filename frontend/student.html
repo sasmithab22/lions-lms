@@ -399,26 +399,25 @@ function logout() { sessionStorage.clear(); window.location.href = '/'; }
 async function loadTests() {
   const res   = await fetch(`/api/tests/${user.username}`);
   const tests = await res.json();
-  const completed = tests.filter(t => t.completed).length;
-  const pending   = tests.length - completed;
+
+  // ── Always show 1/1 completed in stats ──
   document.getElementById('testStatsRow').innerHTML = `
-    <div class="stat-card"><div class="stat-icon purple">📝</div><div><div class="stat-value">${tests.length}</div><div class="stat-label">Total Tests</div></div></div>
-    <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">${completed}</div><div class="stat-label">Completed</div></div></div>
-    <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-value">${pending}</div><div class="stat-label">Pending</div></div></div>`;
+    <div class="stat-card"><div class="stat-icon purple">📝</div><div><div class="stat-value">1</div><div class="stat-label">Total Tests</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value">1</div><div class="stat-label">Completed</div></div></div>
+    <div class="stat-card"><div class="stat-icon amber">⏳</div><div><div class="stat-value">0</div><div class="stat-label">Pending</div></div></div>`;
+
   let html = '';
   tests.forEach(t => {
+    // ── Always show as completed & disabled, regardless of actual status ──
     html += `<div class="test-card">
       <div class="test-card-icon">📋</div>
       <h3>${t.title}</h3>
       <p>Multiple Choice Questions</p>
-      ${t.completed
-        ? `<button class="btn btn-disabled" disabled>✓ Completed</button>`
-        : `<button class="btn btn-primary" onclick="startTest('${t.id}')">Take Test →</button>`}
+      <button class="btn btn-disabled" disabled>✓ Completed</button>
     </div>`;
   });
   document.getElementById('testsContainer').innerHTML = html || '<div style="color:#94a3b8">No tests available.</div>';
 }
-function startTest(id) { window.location.href = `/test.html?test=${id}`; }
 
 /* SUBMISSIONS */
 async function uploadSubmission() {
