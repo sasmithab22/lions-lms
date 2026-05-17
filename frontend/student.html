@@ -146,16 +146,17 @@ tbody tr:hover td { background: var(--bg); }
 .tool-tile .tool-logo.teal   { background: #ccfbf1; }
 .tool-tile .tool-logo.slate  { background: #f1f5f9; }
 
-/* BROADCAST BANNER */
-.broadcast-banner { display: flex; align-items: center; gap: 14px; padding: 13px 24px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 600; animation: slideDown .35s ease; position: relative; }
-.broadcast-banner.info    { background: #eff6ff; color: #1e40af; border-left: 4px solid #3b82f6; }
-.broadcast-banner.warning { background: #fffbeb; color: #92400e; border-left: 4px solid #f59e0b; }
-.broadcast-banner.success { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
-.broadcast-banner-icon { font-size: 18px; flex-shrink: 0; }
-.broadcast-banner-text { flex: 1; line-height: 1.5; }
-.broadcast-dismiss { background: none; border: none; cursor: pointer; font-size: 16px; color: inherit; opacity: 0.5; padding: 4px 6px; border-radius: 6px; transition: opacity .15s; flex-shrink: 0; }
-.broadcast-dismiss:hover { opacity: 1; background: rgba(0,0,0,0.07); }
-@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+/* MESSAGES PANEL */
+.messages-feed { display: flex; flex-direction: column; gap: 16px; padding: 4px 0; }
+.msg-bubble-wrap { display: flex; flex-direction: column; gap: 5px; }
+.msg-meta { font-size: 11px; color: var(--muted); font-weight: 600; padding: 0 4px; }
+.msg-bubble { border-radius: 4px 16px 16px 16px; padding: 14px 18px; max-width: 84%; line-height: 1.65; font-size: 13.5px; font-weight: 500; }
+.msg-bubble.info    { background: #eff6ff; color: #1e3a5f; border: 1px solid #bfdbfe; }
+.msg-bubble.warning { background: #fffbeb; color: #78350f; border: 1px solid #fde68a; }
+.msg-bubble.success { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+.msg-bubble-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; background: rgba(99,102,241,0.1); color: var(--accent); border: 1px solid rgba(99,102,241,0.2); transition: all .15s; }
+.msg-bubble-link:hover { background: var(--accent); color: #fff; }
+.nav-item .msg-count { margin-left: auto; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; border-radius: 99px; padding: 1px 6px; min-width: 18px; text-align: center; }
 
 .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center; }
 .lightbox.open { display: flex; }
@@ -206,6 +207,8 @@ tbody tr:hover td { background: var(--bg); }
     <div class="nav-label">Insights</div>
     <button class="nav-item" onclick="showTab('insights', this)"><span class="nav-icon">💡</span> My Insights</button>
     <button class="nav-item" onclick="showTab('tools', this)"><span class="nav-icon">🛠️</span> Tools Learnt</button>
+    <div class="nav-label">Communication</div>
+    <button class="nav-item" id="navMessages" onclick="showTab('messages', this)"><span class="nav-icon">💬</span> Messages <span class="msg-count" id="msgBadge" style="display:none"></span></button>
   </div>
 
   <div class="sidebar-footer">
@@ -218,9 +221,6 @@ tbody tr:hover td { background: var(--bg); }
     <div class="topbar-title" id="topbarTitle">Tests</div>
     <span class="badge badge-student">Student</span>
   </div>
-
-  <!-- BROADCAST BANNER -->
-  <div id="broadcastBanner" style="display:none"></div>
 
   <div class="content">
 
@@ -369,6 +369,22 @@ tbody tr:hover td { background: var(--bg); }
   </div>
 </div>
 
+    <!-- MESSAGES -->
+    <div class="panel" id="panel-messages">
+      <div class="card" style="margin-bottom:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text)">💬 Messages</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Announcements from your teacher</div>
+          </div>
+          <span id="msgPanelCount" style="font-size:12px;color:var(--muted);font-weight:600"></span>
+        </div>
+        <div id="messagesFeed" class="messages-feed">
+          <div style="color:#94a3b8;padding:30px;text-align:center">Loading messages…</div>
+        </div>
+      </div>
+    </div>
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightboxImg" src="" alt=""/>
@@ -384,7 +400,7 @@ document.getElementById('avatarLetter').textContent = (user.name || 'S')[0].toUp
 const tabTitles = {
   tests: 'Tests', submissions: 'Submissions', attendance: 'Attendance',
   marks: 'My Marks', materials: 'Study Materials', gallery: 'Gallery', insights: 'My Insights',
-  tools: 'Tools Learnt'
+  tools: 'Tools Learnt', messages: 'Messages'
 };
 
 const loaded = {};
@@ -405,6 +421,7 @@ function lazyLoad(name) {
   if (name === 'materials')    loadMaterials();
   if (name === 'gallery')      loadGallery();
   if (name === 'insights')     loadInsights();
+  if (name === 'messages')     loadMessages();
 }
 
 function logout() { sessionStorage.clear(); window.location.href = '/'; }
@@ -776,36 +793,49 @@ async function renderTools() {
   }
 }
 
-/* BROADCAST BANNER */
-async function loadBroadcast() {
+/* MESSAGES */
+async function loadMessages() {
+  const feed = document.getElementById('messagesFeed');
   try {
     const res      = await fetch('/api/broadcast');
     const messages = await res.json();
-    if (!messages.length) return;
-    const icons = { info: '📢', warning: '⚠️', success: '✅' };
-    const banner = document.getElementById('broadcastBanner');
-    banner.innerHTML = messages.map((data, i) => {
-      const type = data.type || 'info';
+    if (!messages.length) {
+      feed.innerHTML = '<div style="color:#94a3b8;padding:40px;text-align:center;font-size:13px">No messages yet.</div>';
+      return;
+    }
+    document.getElementById('msgPanelCount').textContent = messages.length + ' message' + (messages.length !== 1 ? 's' : '');
+    feed.innerHTML = messages.map(m => {
+      const type = m.type || 'info';
+      const linkHtml = m.link
+        ? `<div><a class="msg-bubble-link" href="${m.link}" target="_blank" rel="noopener">&#128279; Open Link</a></div>`
+        : '';
       return `
-        <div class="broadcast-banner ${type}" id="broadcastItem${i}">
-          <span class="broadcast-banner-icon">${icons[type] || '📢'}</span>
-          <span class="broadcast-banner-text">${data.message}</span>
-          <button class="broadcast-dismiss" onclick="dismissBroadcast(${i})" title="Dismiss">✕</button>
+        <div class="msg-bubble-wrap">
+          <div class="msg-meta">&#128204; ${m.from || 'Administrator'} &nbsp;&middot;&nbsp; ${m.time || ''}</div>
+          <div class="msg-bubble ${type}">
+            ${m.message}
+            ${linkHtml}
+          </div>
         </div>`;
     }).join('');
-    banner.style.display = 'block';
-  } catch(e) { /* silently ignore */ }
+  } catch(e) {
+    feed.innerHTML = '<div style="color:#94a3b8;padding:30px;text-align:center">Could not load messages.</div>';
+  }
 }
 
-function dismissBroadcast(i) {
-  const el = document.getElementById('broadcastItem' + i);
-  if (el) el.style.display = 'none';
-  const remaining = document.querySelectorAll('#broadcastBanner .broadcast-banner');
-  const anyVisible = [...remaining].some(b => b.style.display !== 'none');
-  if (!anyVisible) document.getElementById('broadcastBanner').style.display = 'none';
-}
+// Load message count on startup for sidebar badge
+(async () => {
+  try {
+    const res = await fetch('/api/broadcast');
+    const msgs = await res.json();
+    if (msgs.length) {
+      const badge = document.getElementById('msgBadge');
+      badge.textContent = msgs.length;
+      badge.style.display = 'inline-block';
+    }
+  } catch(e) {}
+})();
 
-loadBroadcast();
 
 loadTests();
 loaded['tests'] = true;
