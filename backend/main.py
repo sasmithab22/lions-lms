@@ -1036,6 +1036,27 @@ TOOLS_LIST = [
 def get_tools():
     return TOOLS_LIST
 
+# ─────────────────────────────────────────────
+# BROADCAST MESSAGES
+# ─────────────────────────────────────────────
+
+BROADCAST_MESSAGES = [
+    {
+        "active": True,
+        "type": "info",   # "info" | "warning" | "success"
+        "message": "📢 Dear Students, Welcome to the Raam Academy AI Training Course. Best of luck! 🌟",
+    },
+    {
+        "active": True,
+        "type": "success",
+        "message": "✅ As per your request your new feature to broadcast message is ready!",
+    }
+]
+
+@app.get("/api/broadcast")
+def get_broadcast():
+    return [m for m in BROADCAST_MESSAGES if m.get("active")]
+
 
 @app.post("/api/upload-material")
 async def upload_material(file: UploadFile = File(...)):

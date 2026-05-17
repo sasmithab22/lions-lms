@@ -146,6 +146,17 @@ tbody tr:hover td { background: var(--bg); }
 .tool-tile .tool-logo.teal   { background: #ccfbf1; }
 .tool-tile .tool-logo.slate  { background: #f1f5f9; }
 
+/* BROADCAST BANNER */
+.broadcast-banner { display: flex; align-items: center; gap: 14px; padding: 13px 24px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 600; animation: slideDown .35s ease; position: relative; }
+.broadcast-banner.info    { background: #eff6ff; color: #1e40af; border-left: 4px solid #3b82f6; }
+.broadcast-banner.warning { background: #fffbeb; color: #92400e; border-left: 4px solid #f59e0b; }
+.broadcast-banner.success { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
+.broadcast-banner-icon { font-size: 18px; flex-shrink: 0; }
+.broadcast-banner-text { flex: 1; line-height: 1.5; }
+.broadcast-dismiss { background: none; border: none; cursor: pointer; font-size: 16px; color: inherit; opacity: 0.5; padding: 4px 6px; border-radius: 6px; transition: opacity .15s; flex-shrink: 0; }
+.broadcast-dismiss:hover { opacity: 1; background: rgba(0,0,0,0.07); }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
 .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; align-items: center; justify-content: center; }
 .lightbox.open { display: flex; }
 .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
@@ -207,6 +218,9 @@ tbody tr:hover td { background: var(--bg); }
     <div class="topbar-title" id="topbarTitle">Tests</div>
     <span class="badge badge-student">Student</span>
   </div>
+
+  <!-- BROADCAST BANNER -->
+  <div id="broadcastBanner" style="display:none"></div>
 
   <div class="content">
 
@@ -761,6 +775,37 @@ async function renderTools() {
     grid.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center">Could not load tools.</div>';
   }
 }
+
+/* BROADCAST BANNER */
+async function loadBroadcast() {
+  try {
+    const res      = await fetch('/api/broadcast');
+    const messages = await res.json();
+    if (!messages.length) return;
+    const icons = { info: '📢', warning: '⚠️', success: '✅' };
+    const banner = document.getElementById('broadcastBanner');
+    banner.innerHTML = messages.map((data, i) => {
+      const type = data.type || 'info';
+      return `
+        <div class="broadcast-banner ${type}" id="broadcastItem${i}">
+          <span class="broadcast-banner-icon">${icons[type] || '📢'}</span>
+          <span class="broadcast-banner-text">${data.message}</span>
+          <button class="broadcast-dismiss" onclick="dismissBroadcast(${i})" title="Dismiss">✕</button>
+        </div>`;
+    }).join('');
+    banner.style.display = 'block';
+  } catch(e) { /* silently ignore */ }
+}
+
+function dismissBroadcast(i) {
+  const el = document.getElementById('broadcastItem' + i);
+  if (el) el.style.display = 'none';
+  const remaining = document.querySelectorAll('#broadcastBanner .broadcast-banner');
+  const anyVisible = [...remaining].some(b => b.style.display !== 'none');
+  if (!anyVisible) document.getElementById('broadcastBanner').style.display = 'none';
+}
+
+loadBroadcast();
 
 loadTests();
 loaded['tests'] = true;
