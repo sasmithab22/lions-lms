@@ -699,31 +699,31 @@ BROADCAST_MESSAGES = [
         "time": "Today, 9:00 AM",
         "message": "📢 Dear Students, Welcome to the Raam Academy AI Training Course. Best of luck! 🌟",
         "link": None,
-    },
-    {
-        "active": True,
-        "type": "warning",
-        "from": "Administrator",
-        "time": "Today, 10:30 AM",
-        "message": "⚠️ Reminder: All pending assignments must be submitted before 20th May 2026.",
-        "link": None,
-    },
-    {
-        "active": True,
-        "type": "success",
-        "from": "Administrator",
-        "time": "Today, 11:00 AM",
-        "message": "✅ Study materials for all subjects have been uploaded. Check the Materials section!",
-        "link": None,
-    },
-    {
-        "active": True,
-        "type": "info",
-        "from": "Administrator",
-        "time": "Today, 11:15 AM",
-        "message": "🔗 Here is the resource link for today's session on AI Tools:",
-        "link": "https://docs.google.com",
-    },
+    }
+    # {
+    #     "active": True,
+    #     "type": "warning",
+    #     "from": "Administrator",
+    #     "time": "Today, 10:30 AM",
+    #     "message": "⚠️ Reminder: All pending assignments must be submitted before 20th May 2026.",
+    #     "link": None,
+    # },
+    # {
+    #     "active": True,
+    #     "type": "success",
+    #     "from": "Administrator",
+    #     "time": "Today, 11:00 AM",
+    #     "message": "✅ Study materials for all subjects have been uploaded. Check the Materials section!",
+    #     "link": None,
+    # },
+    # {
+    #     "active": True,
+    #     "type": "info",
+    #     "from": "Administrator",
+    #     "time": "Today, 11:15 AM",
+    #     "message": "🔗 Here is the resource link for today's session on AI Tools:",
+    #     "link": "https://docs.google.com",
+    # },
 ]
 
 @app.get("/api/broadcast")
