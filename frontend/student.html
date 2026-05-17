@@ -196,18 +196,18 @@ tbody tr:hover td { background: var(--bg); }
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Learning</div>
+    <!-- <div class="nav-label">Learning</div> -->
     <button class="nav-item active" onclick="showTab('tests', this)"><span class="nav-icon">📝</span> Take Tests</button>
     <button class="nav-item" onclick="showTab('submissions', this)"><span class="nav-icon">📤</span> Submissions</button>
     <button class="nav-item" onclick="showTab('attendance', this)"><span class="nav-icon">📅</span> Attendance</button>
     <button class="nav-item" onclick="showTab('marks', this)"><span class="nav-icon">📊</span> My Marks</button>
-    <div class="nav-label">Resources</div>
+    <!-- <div class="nav-label">Resources</div> -->
     <button class="nav-item" onclick="showTab('materials', this)"><span class="nav-icon">📚</span> Materials</button>
     <button class="nav-item" onclick="showTab('gallery', this)"><span class="nav-icon">🖼️</span> Gallery</button>
-    <div class="nav-label">Insights</div>
+    <!-- <div class="nav-label">Insights</div> -->
     <button class="nav-item" onclick="showTab('insights', this)"><span class="nav-icon">💡</span> My Insights</button>
     <button class="nav-item" onclick="showTab('tools', this)"><span class="nav-icon">🛠️</span> Tools Learnt</button>
-    <div class="nav-label">Communication</div>
+    <!-- <div class="nav-label">Communication</div> -->
     <button class="nav-item" id="navMessages" onclick="showTab('messages', this)"><span class="nav-icon">💬</span> Messages <span class="msg-count" id="msgBadge" style="display:none"></span></button>
   </div>
 
@@ -366,8 +366,6 @@ tbody tr:hover td { background: var(--bg); }
       </div>
       <div class="tools-grid" id="toolsGrid"></div>
     </div>
-  </div>
-</div>
 
     <!-- MESSAGES -->
     <div class="panel" id="panel-messages">
@@ -384,6 +382,10 @@ tbody tr:hover td { background: var(--bg); }
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+    
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
