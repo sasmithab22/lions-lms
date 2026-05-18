@@ -699,7 +699,7 @@ BROADCAST_MESSAGES = [
         "time": "Today, 9:00 AM",
         "message": "📢 Dear Students, Welcome to the Raam Academy AI Training Course. Best of luck! 🌟",
         "link": None,
-    }
+    },
     # {
     #     "active": True,
     #     "type": "warning",
@@ -716,14 +716,14 @@ BROADCAST_MESSAGES = [
     #     "message": "✅ Study materials for all subjects have been uploaded. Check the Materials section!",
     #     "link": None,
     # },
-    # {
-    #     "active": True,
-    #     "type": "info",
-    #     "from": "Administrator",
-    #     "time": "Today, 11:15 AM",
-    #     "message": "🔗 Here is the resource link for today's session on AI Tools:",
-    #     "link": "https://docs.google.com",
-    # },
+    {
+        "active": True,
+        "type": "info",
+        "from": "Administrator",
+        "time": "Today, 4:15 PM",
+        "message": "🔗 Here is the submission link for today's session on AI Tools:",
+        "link": "https://forms.gle/KfYn2Jt8JQaxUZzi8",
+    },
 ]
 
 @app.get("/api/broadcast")
