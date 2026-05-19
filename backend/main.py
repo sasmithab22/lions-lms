@@ -681,6 +681,42 @@ TOOLS_LIST = [
             "Using AI-powered forms for assessments and data gathering",
         ],
     },
+    {
+        "name": "Canva",
+        "icon": "🎨",
+        "color": "pink",
+        "category": "Presentation & Mind Map Design",
+        "learnt": [
+            "Creating professional classroom presentations",
+            "Using ready-made educational presentation templates",
+            "Designing mind maps for concept understanding",
+            "Building visually engaging educational materials",
+        ],
+    },
+    {
+        "name": "Leonardo AI",
+        "icon": "🖼️",
+        "color": "yellow",
+        "category": "AI Image Generation",
+        "learnt": [
+            "Generating educational images using AI prompts",
+            "Creating custom illustrations for teaching",
+            "Designing subject-specific visual content",
+            "Enhancing presentations with AI-generated graphics",
+        ],
+    },
+    {
+        "name": "n8n",
+        "icon": "⚙️",
+        "color": "indigo",
+        "category": "Workflow & Mail Automation",
+        "learnt": [
+            "Automating email workflows",
+            "Creating no-code automation pipelines",
+            "Connecting apps for smart classroom workflows",
+            "Sending automated notifications and reports",
+        ],
+    },
 ]
 
 @app.get("/api/tools")
