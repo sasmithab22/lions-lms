@@ -757,8 +757,8 @@ BROADCAST_MESSAGES = [
         "type": "info",
         "from": "Administrator",
         "time": "Today, 4:15 PM",
-        "message": "🔗 Here is the submission link for today's session on N8N and Mindmap:",
-        "link": "https://docs.google.com/forms/d/e/1FAIpQLSeHtbqTWHfV_N_Ek-mlxXYe3I38rizd-CukUAXafCuKGcjq6Q/viewform?usp=publish-editor",
+        "message": "🔗 Here is the submission link for Day 5",
+        "link": "https://docs.google.com/forms/d/e/1FAIpQLScwvFK9ZRaVVxkF8EFLRKvds6VNw7kcUZU-WuqBdhaO_OhM-A/viewform?usp=publish-editor",
     },
 ]
 
