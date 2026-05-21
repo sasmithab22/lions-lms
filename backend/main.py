@@ -760,6 +760,14 @@ BROADCAST_MESSAGES = [
         "message": "🔗 Here is the submission link for Day 5",
         "link": "https://docs.google.com/forms/d/e/1FAIpQLScwvFK9ZRaVVxkF8EFLRKvds6VNw7kcUZU-WuqBdhaO_OhM-A/viewform?usp=publish-editor",
     },
+    {
+        "active": True,
+        "type": "info",
+        "from": "Administrator",
+        "time": "Today, 4:15 PM",
+        "message": "🔗 Here is your link to Topics ",
+        "link": "https://docs.google.com/spreadsheets/d/1tLbCLmlrmn065A0rdafZvLQOQlyzK_QoXzdIuovhTk0/edit?usp=sharing",
+    },
 ]
 
 @app.get("/api/broadcast")
