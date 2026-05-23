@@ -765,8 +765,8 @@ BROADCAST_MESSAGES = [
         "type": "info",
         "from": "Administrator",
         "time": "Today, 4:15 PM",
-        "message": "🔗 Here is your link to Topics ",
-        "link": "https://docs.google.com/spreadsheets/d/1tLbCLmlrmn065A0rdafZvLQOQlyzK_QoXzdIuovhTk0/edit?usp=sharing",
+        "message": "🔗 Here is your link to feedback ",
+        "link": "https://forms.gle/WL6ZZMsvDYqpxpZEA",
     },
 ]
 
