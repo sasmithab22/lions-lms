@@ -46,7 +46,7 @@ RESULTS_FILE = os.path.join(
 
 ADMIN_USERS = {
     "admin": {
-        "password": "admin124",
+        "password": "admin123",
         "role": "admin",
         "name": "Administrator",
     }
